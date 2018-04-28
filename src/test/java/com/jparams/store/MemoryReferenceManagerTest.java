@@ -8,17 +8,10 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for {@link MemoryReferenceManager}
- */
 public class MemoryReferenceManagerTest
 {
-
     private MemoryReferenceManager<String> subject;
 
-    /**
-     * set up
-     */
     @Before
     public void setUp()
     {

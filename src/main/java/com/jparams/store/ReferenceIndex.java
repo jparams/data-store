@@ -104,10 +104,10 @@ class ReferenceIndex<T> extends AbstractIndex<T>
     }
 
     @Override
-    ReferenceIndex<T> copy(final boolean withData)
+    ReferenceIndex<T> copy()
     {
-        final Map<Object, Set<Reference<T>>> keyToReferenceMapCopy = withData ? keyToReferenceMap.entrySet().stream().collect(Collectors.toMap(Entry::getKey, references -> new HashSet<>(references.getValue()))) : new HashMap<>();
-        final Map<Reference<T>, Set<Object>> referenceToKeysMapCopy = withData ? new HashMap<>(referenceToKeysMap) : new HashMap<>();
+        final Map<Object, Set<Reference<T>>> keyToReferenceMapCopy = keyToReferenceMap.entrySet().stream().collect(Collectors.toMap(Entry::getKey, references -> new HashSet<>(references.getValue())));
+        final Map<Reference<T>, Set<Object>> referenceToKeysMapCopy = new HashMap<>(referenceToKeysMap);
         return new ReferenceIndex<>(getName(), getTransformer(), keyToReferenceMapCopy, referenceToKeysMapCopy);
     }
 }

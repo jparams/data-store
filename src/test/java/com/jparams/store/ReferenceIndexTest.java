@@ -84,14 +84,8 @@ public class ReferenceIndexTest
     }
 
     @Test
-    public void testEmptyCopy()
-    {
-        assertThat(subject.copy(false)).isEqualToComparingFieldByField(new ReferenceIndex<>(indexName, transformer));
-    }
-
-    @Test
     public void testFullCopy()
     {
-        assertThat(subject.copy(true)).isEqualToComparingFieldByField(subject);
+        assertThat(subject.copy()).isEqualToComparingFieldByField(subject);
     }
 }

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractStore<T> extends AbstractCollection<T> implements Store<T>
 {
     private final ReferenceManager<T> referenceManager;
-    private Map<String, AbstractIndex<T>> indexMap;
+    private final Map<String, AbstractIndex<T>> indexMap;
 
     AbstractStore(final ReferenceManager<T> referenceManager)
     {
@@ -69,18 +69,13 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     public void reindex()
     {
         final Collection<Reference<T>> references = referenceManager.getReferences();
-        indexMap = indexMap.values()
-                           .stream()
-                           .map(index -> index.copy(false))
-                           .peek(index -> references.forEach(index::add))
-                           .collect(Collectors.toMap(AbstractIndex::getName, Function.identity()));
+        indexMap.values().forEach(index -> references.forEach(index::reindex));
     }
 
     @Override
     public void reindex(final T item)
     {
-        referenceManager.findReference(item)
-                        .ifPresent((reference) -> indexMap.values().forEach(index -> index.reindex(reference)));
+        referenceManager.findReference(item).ifPresent((reference) -> indexMap.values().forEach(index -> index.reindex(reference)));
     }
 
     @Override

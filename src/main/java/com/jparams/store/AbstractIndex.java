@@ -29,7 +29,7 @@ abstract class AbstractIndex<T> implements Index<T>
 
     abstract void remove(final Reference<T> reference);
 
-    abstract AbstractIndex<T> copy(boolean withData);
+    abstract AbstractIndex<T> copy();
 
     Transformer<T, ?> getTransformer()
     {
