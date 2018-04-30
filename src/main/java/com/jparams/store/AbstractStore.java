@@ -160,11 +160,11 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     @Override
     public boolean remove(final Object obj)
     {
-        final Optional<Reference<T>> reference = referenceManager.findReference(obj);
+        final Reference<T> reference = referenceManager.remove(obj);
 
-        if (reference.isPresent())
+        if (reference != null)
         {
-            indexMap.values().forEach(index -> index.removeIndex(reference.get()));
+            indexMap.values().forEach(index -> index.removeIndex(reference));
             return true;
         }
 
@@ -175,7 +175,7 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     public void clear()
     {
         referenceManager.clear();
-        reindex();
+        indexMap.values().forEach(AbstractIndex::clear);
     }
 
     @Override

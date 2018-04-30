@@ -67,4 +67,10 @@ public class MemoryReferenceManager<T> implements ReferenceManager<T>
     {
         return new MemoryReferenceManager<>(this);
     }
+
+    @Override
+    public Reference<T> remove(final Object item)
+    {
+        return referenceMap.remove(item);
+    }
 }

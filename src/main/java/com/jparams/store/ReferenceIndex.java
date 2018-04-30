@@ -2,7 +2,6 @@ package com.jparams.store;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +105,15 @@ class ReferenceIndex<T> extends AbstractIndex<T>
     @Override
     ReferenceIndex<T> copy()
     {
-        final Map<Object, Set<Reference<T>>> keyToReferenceMapCopy = keyToReferenceMap.entrySet().stream().collect(Collectors.toMap(Entry::getKey, references -> new HashSet<>(references.getValue())));
+        final Map<Object, Set<Reference<T>>> keyToReferenceMapCopy = keyToReferenceMap.entrySet().stream().collect(Collectors.toMap(Entry::getKey, references -> new LinkedHashSet<>(references.getValue())));
         final Map<Reference<T>, Set<Object>> referenceToKeysMapCopy = new HashMap<>(referenceToKeysMap);
         return new ReferenceIndex<>(getName(), getTransformer(), keyToReferenceMapCopy, referenceToKeysMapCopy);
+    }
+
+    @Override
+    void clear()
+    {
+        keyToReferenceMap.clear();
+        referenceToKeysMap.clear();
     }
 }

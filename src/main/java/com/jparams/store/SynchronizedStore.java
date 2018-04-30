@@ -3,6 +3,7 @@ package com.jparams.store;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class SynchronizedStore<T> implements Store<T>
 {
@@ -38,7 +39,14 @@ class SynchronizedStore<T> implements Store<T>
     {
         synchronized (mutex)
         {
-            return store.getIndex(indexName);
+            final Index<T> index = store.getIndex(indexName);
+
+            if (index == null)
+            {
+                return null;
+            }
+
+            return new SynchronizedIndex<>(index, mutex);
         }
     }
 
@@ -47,7 +55,7 @@ class SynchronizedStore<T> implements Store<T>
     {
         synchronized (mutex)
         {
-            return store.getIndexes();
+            return store.getIndexes().stream().map(index -> new SynchronizedIndex<>(index, mutex)).collect(Collectors.toList());
         }
     }
 
@@ -56,7 +64,14 @@ class SynchronizedStore<T> implements Store<T>
     {
         synchronized (mutex)
         {
-            return store.removeIndex(index);
+            if (index instanceof SynchronizedIndex)
+            {
+                return store.removeIndex(((SynchronizedIndex<T>) index).getIndex());
+            }
+            else
+            {
+                return store.removeIndex(index);
+            }
         }
     }
 

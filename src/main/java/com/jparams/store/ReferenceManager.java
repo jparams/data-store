@@ -53,4 +53,11 @@ public interface ReferenceManager<T>
      * @return copy
      */
     ReferenceManager<T> copy();
+
+    /**
+     * Remove item in store
+     *
+     * @param item
+     */
+    Reference<T> remove(Object item);
 }

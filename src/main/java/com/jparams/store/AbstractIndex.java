@@ -43,6 +43,8 @@ abstract class AbstractIndex<T> implements Index<T>
 
     abstract AbstractIndex<T> copy();
 
+    abstract void clear();
+
     Transformer<T, ?> getTransformer()
     {
         return transformer;

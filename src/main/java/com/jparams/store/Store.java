@@ -1,5 +1,6 @@
 package com.jparams.store;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -49,9 +50,9 @@ public interface Store<T> extends Collection<T>
     /**
      * Remove all indexes associated with this store
      */
-    default void clearIndexes()
+    default void removeAllIndexes()
     {
-        getIndexes().forEach(this::removeIndex);
+        new ArrayList<>(getIndexes()).forEach(this::removeIndex);
     }
 
     /**

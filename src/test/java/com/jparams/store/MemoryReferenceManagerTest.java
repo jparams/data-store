@@ -54,6 +54,14 @@ public class MemoryReferenceManagerTest
     }
 
     @Test
+    public void testRemoveReference()
+    {
+        final Reference<String> reference = subject.add("abc");
+        assertThat(subject.remove("abc")).isEqualTo(reference);
+        assertThat(subject.remove("abcd")).isNull();
+    }
+
+    @Test
     public void testGetReferences()
     {
         subject.add("abc");
