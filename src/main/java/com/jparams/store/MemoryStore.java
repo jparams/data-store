@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 /**
  * In memory implementation of a {@link Store}
  *
- * @param <T>
+ * @param <T> type of item referenced
  */
 public class MemoryStore<T> extends AbstractStore<T>
 {

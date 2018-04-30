@@ -43,6 +43,15 @@ class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
+    public Collection<Index<T>> getIndexes()
+    {
+        synchronized (mutex)
+        {
+            return store.getIndexes();
+        }
+    }
+
+    @Override
     public boolean removeIndex(final Index<T> index)
     {
         synchronized (mutex)
@@ -66,6 +75,15 @@ class SynchronizedStore<T> implements Store<T>
         synchronized (mutex)
         {
             store.reindex();
+        }
+    }
+
+    @Override
+    public void reindex(final Collection<T> items)
+    {
+        synchronized (mutex)
+        {
+            store.reindex(items);
         }
     }
 
@@ -208,5 +226,10 @@ class SynchronizedStore<T> implements Store<T>
         {
             store.clear();
         }
+    }
+
+    Store<T> getStore()
+    {
+        return store;
     }
 }

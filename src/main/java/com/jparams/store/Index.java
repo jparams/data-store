@@ -13,7 +13,7 @@ public interface Index<T>
     /**
      * Get first indexed item matching key. This is the same as {@link Index#findFirst(Object)}, but returns an null instead of an optional if no result found.
      *
-     * @param key
+     * @param key indexed key to lookup
      * @return optional
      */
     default T getFirst(final Object key)
@@ -24,7 +24,7 @@ public interface Index<T>
     /**
      * Find first indexed item matching key. This is the same as {@link Index#getFirst(Object)}, but returns an optional instead of a null if no result found.
      *
-     * @param key
+     * @param key indexed key to lookup
      * @return optional
      */
     Optional<T> findFirst(final Object key);
@@ -32,7 +32,7 @@ public interface Index<T>
     /**
      * Find all indexed items matching key
      *
-     * @param key
+     * @param key indexed key to lookup
      * @return matching items
      */
     List<T> get(final Object key);

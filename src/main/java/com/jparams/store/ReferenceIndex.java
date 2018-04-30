@@ -62,11 +62,11 @@ class ReferenceIndex<T> extends AbstractIndex<T>
     }
 
     @Override
-    void add(final Reference<T> reference)
+    void index(final Reference<T> reference) throws IndexCreationException
     {
         final Set<Object> keys = generateKeys(reference);
 
-        remove(reference);
+        removeIndex(reference);
 
         if (!keys.isEmpty())
         {
@@ -76,7 +76,7 @@ class ReferenceIndex<T> extends AbstractIndex<T>
     }
 
     @Override
-    void remove(final Reference<T> reference)
+    void removeIndex(final Reference<T> reference)
     {
         final Set<Object> keys = referenceToKeysMap.get(reference);
 

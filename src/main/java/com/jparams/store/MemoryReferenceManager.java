@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * In memory reference manager creates, stores and manages {@link MemoryReference}
  *
- * @param <T>
+ * @param <T> type of item referenced
  */
 public class MemoryReferenceManager<T> implements ReferenceManager<T>
 {
@@ -50,15 +50,15 @@ public class MemoryReferenceManager<T> implements ReferenceManager<T>
     }
 
     @Override
-    public Reference<T> add(final T obj)
+    public Reference<T> add(final T item)
     {
-        if (referenceMap.containsKey(obj))
+        if (referenceMap.containsKey(item))
         {
-            return referenceMap.get(obj);
+            return referenceMap.get(item);
         }
 
-        final Reference<T> reference = new MemoryReference<>(obj);
-        referenceMap.put(obj, reference);
+        final Reference<T> reference = new MemoryReference<>(item);
+        referenceMap.put(item, reference);
         return reference;
     }
 
