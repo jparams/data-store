@@ -1,4 +1,4 @@
-package com.jparams.store;
+package com.jparams.store.reference;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -42,7 +42,7 @@ public interface ReferenceManager<T>
      * Create a new reference for the given object. If a reference already exists for this item, return
      * existing reference without adding duplicate.
      *
-     * @param item item to add to reference manager
+     * @param item item to on to reference manager
      * @return reference
      */
     Reference<T> add(T item);
@@ -57,7 +57,8 @@ public interface ReferenceManager<T>
     /**
      * Remove item in store
      *
-     * @param item
+     * @param item item to remove
+     * @return reference removed
      */
     Reference<T> remove(Object item);
 }

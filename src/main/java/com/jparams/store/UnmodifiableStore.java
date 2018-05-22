@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 
+import com.jparams.store.comparison.Comparison;
+import com.jparams.store.index.Index;
+
 /**
  * Implementation of a store that cannot be modified
  *
@@ -19,13 +22,7 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
-    public <K> Index<T> addIndex(final String indexName, final Transformer<T, K> valueToKeysTransformer)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <K> Index<T> addIndex(final Transformer<T, K> valueToKeysTransformer)
+    public <K> Index<T> index(final String indexName, final KeyProvider<K, T> keyProvider, final Comparison<K> comparison) throws IndexException
     {
         throw new UnsupportedOperationException();
     }
@@ -99,7 +96,7 @@ class UnmodifiableStore<T> implements Store<T>
     @Override
     public Iterator<T> iterator()
     {
-        return null;
+        return new UnmodifiableIterator<>(store.iterator());
     }
 
     @Override

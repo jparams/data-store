@@ -1,7 +1,9 @@
-package com.jparams.store;
+package com.jparams.store.index;
 
 import java.util.List;
 import java.util.Optional;
+
+import com.jparams.store.Store;
 
 /**
  * Index applied to a {@link Store}

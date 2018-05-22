@@ -1,9 +1,16 @@
-package com.jparams.store;
+package com.jparams.store.memory;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import com.jparams.store.IndexException;
+import com.jparams.store.Key;
+import com.jparams.store.Store;
+import com.jparams.store.SynchronizedStore;
+import com.jparams.store.comparison.string.CaseInsensitiveComparison;
+import com.jparams.store.index.Index;
+import com.jparams.store.index.ReferenceIndex;
+import com.jparams.store.index.SynchronizedIndex;
 import com.jparams.store.model.Person;
 
 import org.junit.Before;
@@ -25,26 +32,37 @@ public class MemoryStoreTest
     public void setUp()
     {
         subject = new MemoryStore<>();
-        firstNameIndex = subject.addIndex("firstName", (person) -> {
+
+        firstNameIndex = subject.index("firstName", (person) -> {
             if (throwException)
             {
                 throw new RuntimeException("error indexing " + person.getFirstName());
             }
 
-            return Keys.create(person.getFirstName());
-        });
-        person1 = new Person("John", "Smith", LocalDate.of(1990, 10, 1));
+            return Key.onEach(person.getFirstName());
+        }, new CaseInsensitiveComparison());
+
+        person1 = createPerson("John", "Smith");
         subject.add(person1);
-        person2 = new Person("James", "Johnson", LocalDate.of(1995, 5, 10));
+
+        person2 = createPerson("James", "Johnson");
         subject.add(person2);
-        person3 = new Person("James", "Johnson", LocalDate.of(1982, 2, 19));
+
+        person3 = createPerson("James", "Johnson");
         subject.add(person3);
+    }
+
+    @Test
+    public void testVarArgConstructor()
+    {
+        subject = new MemoryStore<>(person1, person2);
+        assertThat(subject).containsExactlyInAnyOrder(person1, person2);
     }
 
     @Test
     public void testAddIndex()
     {
-        final Index<Person> lastNameIndex = subject.addIndex((person) -> Keys.create(person.getLastName()));
+        final Index<Person> lastNameIndex = subject.index((person) -> Key.onEach(person.getLastName()));
         assertThat(lastNameIndex.getFirst("Smith")).isSameAs(person1);
         assertThat(lastNameIndex.get("Johnson")).containsExactly(person2, person3);
         assertThat(lastNameIndex.get("Random")).isEmpty();
@@ -53,7 +71,7 @@ public class MemoryStoreTest
     @Test(expected = IllegalArgumentException.class)
     public void testAddDuplicateIndex()
     {
-        assertThat(subject.addIndex(firstNameIndex.getName(), (obj) -> null));
+        assertThat(subject.index(firstNameIndex.getName(), person -> Key.on(person.getFirstName())));
     }
 
     @Test
@@ -92,7 +110,7 @@ public class MemoryStoreTest
     @Test
     public void testRemoveIndexHandlesInvalidIndex()
     {
-        assertThat(subject.removeIndex(new ReferenceIndex<>(firstNameIndex.getName(), null)));
+        assertThat(subject.removeIndex(new ReferenceIndex<>(firstNameIndex.getName(), null, null)));
         assertThat(subject.getIndexes()).isNotEmpty();
     }
 
@@ -151,8 +169,11 @@ public class MemoryStoreTest
 
         // test original data remains unchanged
         assertThat(firstNameIndex.getFirst("John")).isSameAs(person1);
+        assertThat(firstNameIndex.getFirst("john")).isSameAs(person1);
         assertThat(firstNameIndex.get("James")).containsExactly(person2, person3);
+        assertThat(firstNameIndex.get("jaMEs")).containsExactly(person2, person3);
         assertThat(firstNameIndex.get("Random")).isEmpty();
+        assertThat(firstNameIndex.get(1223)).isEmpty();
     }
 
     @Test
@@ -241,21 +262,21 @@ public class MemoryStoreTest
     @Test
     public void testRemoveItemThatDoesNotExist()
     {
-        assertThat(subject.remove(new Person("", "", null))).isFalse();
+        assertThat(subject.remove(createPerson("", ""))).isFalse();
     }
 
     @Test
     public void testContains()
     {
         assertThat(subject.contains(person1)).isTrue();
-        assertThat(subject.contains(new Person("", "", null))).isFalse();
+        assertThat(subject.contains(createPerson("", ""))).isFalse();
     }
 
     @Test
     public void testContainsAll()
     {
         assertThat(subject.containsAll(Arrays.asList(person1, person2))).isTrue();
-        assertThat(subject.containsAll(Arrays.asList(new Person("", "", null), person3))).isFalse();
+        assertThat(subject.containsAll(Arrays.asList(createPerson("", ""), person3))).isFalse();
     }
 
     @Test
@@ -274,7 +295,7 @@ public class MemoryStoreTest
         final Index<Person> copyIndex = copy.getIndex(firstNameIndex.getName());
         assertThat(copyIndex).isNotSameAs(firstNameIndex);
 
-        final Person newPerson = new Person("Jim", "Jaf", null);
+        final Person newPerson = createPerson("Jim", "Jaf");
         copy.add(newPerson);
 
         assertThat(firstNameIndex.getFirst("Jim")).isNull();
@@ -298,14 +319,14 @@ public class MemoryStoreTest
         assertThat(unmodifiable.getIndex("firstName").get("James")).containsExactly(person2, person3);
         assertThat(unmodifiable.getIndex("firstName").get("Random")).isEmpty();
 
-        final Person newPerson = new Person("Jim", "Jaf", null);
+        final Person newPerson = createPerson("Jim", "Jaf");
         subject.add(newPerson);
 
         assertThat(unmodifiable.getIndex("firstName").getFirst("Jim")).isEqualTo(newPerson);
 
         try
         {
-            unmodifiable.add(new Person("Jafy", "Jim", null));
+            unmodifiable.add(createPerson("Jafy", "Jim"));
             fail("expected UnsupportedOperationException");
         }
         catch (final UnsupportedOperationException e)
@@ -330,5 +351,10 @@ public class MemoryStoreTest
         assertThat(synchronizedStore).isExactlyInstanceOf(SynchronizedStore.class);
         assertThat(synchronizedStore.getIndex("firstName")).isExactlyInstanceOf(SynchronizedIndex.class);
         assertThat(((SynchronizedStore<?>) synchronizedStore).getStore()).isSameAs(subject);
+    }
+
+    private Person createPerson(final String firstName, final String lastName)
+    {
+        return new Person(null, firstName, lastName, null, null, null);
     }
 }

@@ -1,9 +1,9 @@
-package com.jparams.store;
+package com.jparams.store.index;
 
 /**
  * Thrown by an Index when indexing of a new item fails.
  */
-class IndexCreationException extends Exception
+public class IndexCreationException extends Exception
 {
     IndexCreationException(final String message, final Throwable cause)
     {

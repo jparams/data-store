@@ -5,7 +5,11 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-class SynchronizedStore<T> implements Store<T>
+import com.jparams.store.comparison.Comparison;
+import com.jparams.store.index.Index;
+import com.jparams.store.index.SynchronizedIndex;
+
+public class SynchronizedStore<T> implements Store<T>
 {
     private final Store<T> store;
     private final Object mutex;
@@ -17,20 +21,11 @@ class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public <K> Index<T> addIndex(final String indexName, final Transformer<T, K> valueToKeysTransformer)
+    public <K> Index<T> index(final String indexName, final KeyProvider<K, T> keyProvider, final Comparison<K> comparison) throws IndexException
     {
         synchronized (mutex)
         {
-            return new SynchronizedIndex<>(store.addIndex(indexName, valueToKeysTransformer), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<T> addIndex(final Transformer<T, K> valueToKeysTransformer)
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.addIndex(valueToKeysTransformer), mutex);
+            return new SynchronizedIndex<>(store.index(indexName, keyProvider, comparison), mutex);
         }
     }
 
@@ -243,7 +238,7 @@ class SynchronizedStore<T> implements Store<T>
         }
     }
 
-    Store<T> getStore()
+    public Store<T> getStore()
     {
         return store;
     }

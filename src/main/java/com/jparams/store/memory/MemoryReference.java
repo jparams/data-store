@@ -1,4 +1,6 @@
-package com.jparams.store;
+package com.jparams.store.memory;
+
+import com.jparams.store.reference.Reference;
 
 /**
  * Reference to a stored item in memory

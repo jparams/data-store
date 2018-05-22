@@ -1,15 +1,15 @@
-package com.jparams.store;
+package com.jparams.store.index;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-class SynchronizedIndex<T> implements Index<T>
+public class SynchronizedIndex<T> implements Index<T>
 {
     private final Index<T> index;
     private final Object mutex;
 
-    SynchronizedIndex(final Index<T> index, final Object mutex)
+    public SynchronizedIndex(final Index<T> index, final Object mutex)
     {
         this.index = index;
         this.mutex = mutex;
@@ -39,7 +39,7 @@ class SynchronizedIndex<T> implements Index<T>
         return index.getName();
     }
 
-    Index<T> getIndex()
+    public Index<T> getIndex()
     {
         return index;
     }

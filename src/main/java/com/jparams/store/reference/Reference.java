@@ -1,4 +1,4 @@
-package com.jparams.store;
+package com.jparams.store.reference;
 
 /**
  * Reference a stored item
