@@ -13,23 +13,37 @@ abstract class AbstractIndex<T> implements Index<T>
         this.transformer = transformer;
     }
 
-    void reindex(final Reference<T> reference)
-    {
-        remove(reference);
-        add(reference);
-    }
-
     @SuppressWarnings("unchecked")
-    Set<Object> generateKeys(final Reference<T> reference)
+    Set<Object> generateKeys(final Reference<T> reference) throws IndexCreationException
     {
-        return (Set<Object>) transformer.transform(reference.get()).getKeys();
+        final T item;
+
+        try
+        {
+            item = reference.get();
+        }
+        catch (final RuntimeException e)
+        {
+            throw new IndexCreationException("Index: " + name + ". Unable to retrieve item to index", e);
+        }
+
+        try
+        {
+            return (Set<Object>) transformer.transform(item).getKeys();
+        }
+        catch (final RuntimeException e)
+        {
+            throw new IndexCreationException("Index: " + name + ". Error generating indexes for item: " + item, e);
+        }
     }
 
-    abstract void add(final Reference<T> reference);
+    abstract void index(final Reference<T> reference) throws IndexCreationException;
 
-    abstract void remove(final Reference<T> reference);
+    abstract void removeIndex(final Reference<T> reference);
 
-    abstract AbstractIndex<T> copy(boolean withData);
+    abstract AbstractIndex<T> copy();
+
+    abstract void clear();
 
     Transformer<T, ?> getTransformer()
     {

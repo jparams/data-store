@@ -58,6 +58,7 @@ public final class Keys<T>
      * @param <T>  type
      * @return keys
      */
+    @SafeVarargs
     public static <T> Keys<T> create(final T... keys)
     {
         return new Keys<>(Arrays.asList(keys));

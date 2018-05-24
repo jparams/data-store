@@ -37,6 +37,12 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
+    public Collection<Index<T>> getIndexes()
+    {
+        return store.getIndexes();
+    }
+
+    @Override
     public boolean removeIndex(final Index<T> index)
     {
         throw new UnsupportedOperationException();
@@ -50,6 +56,12 @@ class UnmodifiableStore<T> implements Store<T>
 
     @Override
     public void reindex()
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void reindex(final Collection<T> items)
     {
         throw new UnsupportedOperationException();
     }
@@ -103,7 +115,7 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
-    public boolean add(final T t)
+    public boolean add(final T item)
     {
         throw new UnsupportedOperationException();
     }

@@ -8,17 +8,10 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for {@link MemoryReferenceManager}
- */
 public class MemoryReferenceManagerTest
 {
-
     private MemoryReferenceManager<String> subject;
 
-    /**
-     * set up
-     */
     @Before
     public void setUp()
     {
@@ -58,6 +51,14 @@ public class MemoryReferenceManagerTest
         final Reference<String> reference = subject.add("abc");
         assertThat(subject.findReference("abc")).hasValue(reference);
         assertThat(subject.findReference("abcd")).isEmpty();
+    }
+
+    @Test
+    public void testRemoveReference()
+    {
+        final Reference<String> reference = subject.add("abc");
+        assertThat(subject.remove("abc")).isEqualTo(reference);
+        assertThat(subject.remove("abcd")).isNull();
     }
 
     @Test

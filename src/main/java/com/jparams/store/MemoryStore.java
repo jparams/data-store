@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 /**
  * In memory implementation of a {@link Store}
  *
- * @param <T>
+ * @param <T> type of item referenced
  */
 public class MemoryStore<T> extends AbstractStore<T>
 {
@@ -25,7 +25,7 @@ public class MemoryStore<T> extends AbstractStore<T>
     protected Store<T> createCopy(final ReferenceManager<T> referenceManager, final Collection<AbstractIndex<T>> indexes)
     {
         final ReferenceManager<T> copyOfReferenceManager = referenceManager.copy();
-        final Set<AbstractIndex<T>> copyOfIndexes = indexes.stream().map(index -> index.copy(true)).collect(Collectors.toSet());
+        final Set<AbstractIndex<T>> copyOfIndexes = indexes.stream().map(AbstractIndex::copy).collect(Collectors.toSet());
         return new MemoryStore<>(copyOfReferenceManager, copyOfIndexes);
     }
 

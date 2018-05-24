@@ -3,7 +3,7 @@ package com.jparams.store;
 /**
  * Reference a stored item
  *
- * @param <T>
+ * @param <T> type of item referenced
  */
 public interface Reference<T>
 {

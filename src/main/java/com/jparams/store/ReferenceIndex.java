@@ -2,7 +2,6 @@ package com.jparams.store;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,11 +61,11 @@ class ReferenceIndex<T> extends AbstractIndex<T>
     }
 
     @Override
-    void add(final Reference<T> reference)
+    void index(final Reference<T> reference) throws IndexCreationException
     {
         final Set<Object> keys = generateKeys(reference);
 
-        remove(reference);
+        removeIndex(reference);
 
         if (!keys.isEmpty())
         {
@@ -76,7 +75,7 @@ class ReferenceIndex<T> extends AbstractIndex<T>
     }
 
     @Override
-    void remove(final Reference<T> reference)
+    void removeIndex(final Reference<T> reference)
     {
         final Set<Object> keys = referenceToKeysMap.get(reference);
 
@@ -104,10 +103,17 @@ class ReferenceIndex<T> extends AbstractIndex<T>
     }
 
     @Override
-    ReferenceIndex<T> copy(final boolean withData)
+    ReferenceIndex<T> copy()
     {
-        final Map<Object, Set<Reference<T>>> keyToReferenceMapCopy = withData ? keyToReferenceMap.entrySet().stream().collect(Collectors.toMap(Entry::getKey, references -> new HashSet<>(references.getValue()))) : new HashMap<>();
-        final Map<Reference<T>, Set<Object>> referenceToKeysMapCopy = withData ? new HashMap<>(referenceToKeysMap) : new HashMap<>();
+        final Map<Object, Set<Reference<T>>> keyToReferenceMapCopy = keyToReferenceMap.entrySet().stream().collect(Collectors.toMap(Entry::getKey, references -> new LinkedHashSet<>(references.getValue())));
+        final Map<Reference<T>, Set<Object>> referenceToKeysMapCopy = new HashMap<>(referenceToKeysMap);
         return new ReferenceIndex<>(getName(), getTransformer(), keyToReferenceMapCopy, referenceToKeysMapCopy);
+    }
+
+    @Override
+    void clear()
+    {
+        keyToReferenceMap.clear();
+        referenceToKeysMap.clear();
     }
 }

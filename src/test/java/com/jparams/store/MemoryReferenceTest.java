@@ -4,9 +4,6 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for {@link MemoryReference}
- */
 public class MemoryReferenceTest
 {
     @Test
