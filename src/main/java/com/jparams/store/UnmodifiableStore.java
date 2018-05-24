@@ -10,37 +10,37 @@ import com.jparams.store.index.Index;
 /**
  * Implementation of a store that cannot be modified
  *
- * @param <T>
+ * @param <V> value type
  */
-class UnmodifiableStore<T> implements Store<T>
+class UnmodifiableStore<V> implements Store<V>
 {
-    private final Store<T> store;
+    private final Store<V> store;
 
-    UnmodifiableStore(final Store<T> store)
+    UnmodifiableStore(final Store<V> store)
     {
         this.store = store;
     }
 
     @Override
-    public <K> Index<T> index(final String indexName, final KeyProvider<K, T> keyProvider, final Comparison<K> comparison) throws IndexException
+    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison) throws IndexException
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Index<T> getIndex(final String indexName)
+    public Index<V> getIndex(final String indexName)
     {
         return store.getIndex(indexName);
     }
 
     @Override
-    public Collection<Index<T>> getIndexes()
+    public Collection<Index<V>> getIndexes()
     {
         return store.getIndexes();
     }
 
     @Override
-    public boolean removeIndex(final Index<T> index)
+    public boolean removeIndex(final Index<V> index)
     {
         throw new UnsupportedOperationException();
     }
@@ -58,19 +58,19 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
-    public void reindex(final Collection<T> items)
+    public void reindex(final Collection<V> items)
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void reindex(final T item)
+    public void reindex(final V item)
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Store<T> unmodifiableStore()
+    public Store<V> unmodifiableStore()
     {
         return this;
     }
@@ -94,7 +94,7 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
-    public Iterator<T> iterator()
+    public Iterator<V> iterator()
     {
         return new UnmodifiableIterator<>(store.iterator());
     }
@@ -112,7 +112,7 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
-    public boolean add(final T item)
+    public boolean add(final V item)
     {
         throw new UnsupportedOperationException();
     }
@@ -130,7 +130,7 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
-    public boolean addAll(final Collection<? extends T> collection)
+    public boolean addAll(final Collection<? extends V> collection)
     {
         return store.addAll(collection);
     }
@@ -154,7 +154,7 @@ class UnmodifiableStore<T> implements Store<T>
     }
 
     @Override
-    public Store<T> copy()
+    public Store<V> copy()
     {
         return store.copy();
     }

@@ -19,19 +19,19 @@ import com.jparams.store.reference.Reference;
  *
  * @param <V> value type
  */
-public class ReferenceIndex<V> extends AbstractIndex<V>
+public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
 {
     private final Map<Object, Set<Reference<V>>> keyToReferenceMap;
     private final Map<Reference<V>, Set<Object>> referenceToKeysMap;
 
-    public ReferenceIndex(final String indexName, final KeyProvider<Object, V> keyProvider, final Comparison<Object> comparison)
+    public ReferenceIndex(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison)
     {
         super(indexName, keyProvider, comparison);
         this.keyToReferenceMap = new HashMap<>();
         this.referenceToKeysMap = new HashMap<>();
     }
 
-    private ReferenceIndex(final String indexName, final KeyProvider<Object, V> keyProvider, final Comparison<Object> comparison, final Map<Object, Set<Reference<V>>> keyToReferenceMap, final Map<Reference<V>, Set<Object>> referenceToKeysMap)
+    private ReferenceIndex(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison, final Map<Object, Set<Reference<V>>> keyToReferenceMap, final Map<Reference<V>, Set<Object>> referenceToKeysMap)
     {
         super(indexName, keyProvider, comparison);
         this.keyToReferenceMap = keyToReferenceMap;
@@ -64,6 +64,12 @@ public class ReferenceIndex<V> extends AbstractIndex<V>
         }
 
         return references.stream().map(Reference::get).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<Object> getKeys()
+    {
+        return keyToReferenceMap.keySet();
     }
 
     @Override
@@ -109,7 +115,7 @@ public class ReferenceIndex<V> extends AbstractIndex<V>
     }
 
     @Override
-    protected AbstractIndex<V> copy(final String name, final KeyProvider<Object, V> keyProvider, final Comparison<Object> comparison)
+    protected AbstractIndex<K, V> copy(final String name, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison)
     {
         final Map<Object, Set<Reference<V>>> keyToReferenceMapCopy = keyToReferenceMap.entrySet()
                                                                                       .stream()

@@ -28,6 +28,6 @@ public class DefaultComparisonTest
     @Test
     public void testGetComparable()
     {
-        assertThat(subject.getComparable("aBcd")).isEqualTo("aBcd");
+        assertThat(subject.createComparable("aBcd")).isEqualTo("aBcd");
     }
 }

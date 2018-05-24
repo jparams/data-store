@@ -3,14 +3,14 @@ package com.jparams.store.reference;
 /**
  * Reference a stored item
  *
- * @param <T> type of item referenced
+ * @param <V> type of item referenced
  */
-public interface Reference<T>
+public interface Reference<V>
 {
     /**
      * Get referenced item
      *
      * @return referenced item
      */
-    T get();
+    V get();
 }

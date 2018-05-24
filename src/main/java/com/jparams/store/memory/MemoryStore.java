@@ -39,21 +39,21 @@ public class MemoryStore<V> extends AbstractStore<V>
         addAll(items);
     }
 
-    private MemoryStore(final ReferenceManager<V> referenceManager, final Set<AbstractIndex<V>> indexes)
+    private MemoryStore(final ReferenceManager<V> referenceManager, final Set<AbstractIndex<?, V>> indexes)
     {
         super(referenceManager, indexes);
     }
 
     @Override
-    protected Store<V> createCopy(final ReferenceManager<V> referenceManager, final Collection<AbstractIndex<V>> indexes)
+    protected Store<V> createCopy(final ReferenceManager<V> referenceManager, final Collection<AbstractIndex<?, V>> indexes)
     {
         final ReferenceManager<V> copyOfReferenceManager = referenceManager.copy();
-        final Set<AbstractIndex<V>> copyOfIndexes = indexes.stream().map(AbstractIndex::copy).collect(Collectors.toSet());
+        final Set<AbstractIndex<?, V>> copyOfIndexes = indexes.stream().map(AbstractIndex::copy).collect(Collectors.toSet());
         return new MemoryStore<>(copyOfReferenceManager, copyOfIndexes);
     }
 
     @Override
-    protected AbstractIndex<V> createIndex(final String indexName, final KeyProvider<Object, V> keyProvider, final Comparison<Object> comparison)
+    protected <K> AbstractIndex<K, V> createIndex(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison)
     {
         return new ReferenceIndex<>(indexName, keyProvider, comparison);
     }

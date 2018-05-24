@@ -8,20 +8,19 @@ import com.jparams.store.KeyProvider;
 import com.jparams.store.comparison.Comparison;
 import com.jparams.store.reference.Reference;
 
-public abstract class AbstractIndex<V> implements Index<V>
+public abstract class AbstractIndex<K, V> implements Index<V>
 {
     private final String name;
-    private final KeyProvider<Object, V> keyProvider;
-    private final Comparison<Object> comparison;
+    private final KeyProvider<K, V> keyProvider;
+    private final Comparison<K> comparison;
 
-    protected AbstractIndex(final String indexName, final KeyProvider<Object, V> keyProvider, final Comparison<Object> comparison)
+    protected AbstractIndex(final String name, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison)
     {
-        name = indexName;
+        this.name = name;
         this.keyProvider = keyProvider;
         this.comparison = comparison;
     }
 
-    @SuppressWarnings("unchecked")
     protected Set<Object> generateKeys(final Reference<V> reference) throws IndexCreationException
     {
         final V item;
@@ -57,7 +56,8 @@ public abstract class AbstractIndex<V> implements Index<V>
             return null;
         }
 
-        return comparison.getComparable(key);
+        @SuppressWarnings("unchecked") final Object comparableKey = comparison.createComparable((K) key);
+        return comparableKey;
     }
 
     public abstract void index(final Reference<V> reference) throws IndexCreationException;
@@ -66,9 +66,9 @@ public abstract class AbstractIndex<V> implements Index<V>
 
     public abstract void clear();
 
-    protected abstract AbstractIndex<V> copy(String name, KeyProvider<Object, V> keyProvider, Comparison<Object> comparison);
+    protected abstract AbstractIndex<K, V> copy(String name, KeyProvider<K, V> keyProvider, Comparison<K> comparison);
 
-    public AbstractIndex<V> copy()
+    public AbstractIndex<K, V> copy()
     {
         return copy(name, keyProvider, comparison);
     }

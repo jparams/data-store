@@ -2,15 +2,17 @@ package com.jparams.store.index;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.jparams.store.Store;
 
 /**
  * Index applied to a {@link Store}
  *
- * @param <T> item type
+ * @param <V> value type
  */
-public interface Index<T>
+public interface Index<V>
 {
     /**
      * Get first indexed item matching key. This is the same as {@link Index#findFirst(Object)}, but returns an null instead of an optional if no result found.
@@ -18,7 +20,7 @@ public interface Index<T>
      * @param key indexed key to lookup
      * @return optional
      */
-    default T getFirst(final Object key)
+    default V getFirst(final Object key)
     {
         return findFirst(key).orElse(null);
     }
@@ -29,7 +31,7 @@ public interface Index<T>
      * @param key indexed key to lookup
      * @return optional
      */
-    Optional<T> findFirst(final Object key);
+    Optional<V> findFirst(final Object key);
 
     /**
      * Find all indexed items matching key
@@ -37,7 +39,7 @@ public interface Index<T>
      * @param key indexed key to lookup
      * @return matching items
      */
-    List<T> get(final Object key);
+    List<V> get(final Object key);
 
     /**
      * Get name of index
@@ -45,4 +47,21 @@ public interface Index<T>
      * @return index names
      */
     String getName();
+
+    /**
+     * Return all keys held by the index
+     *
+     * @return keys
+     */
+    Set<Object> getKeys();
+
+    /**
+     * Return all entries in index
+     *
+     * @return entry of key and values
+     */
+    default List<Entry<V>> getEntries()
+    {
+        return getKeys().stream().map(key -> new Entry<>(key, this)).collect(Collectors.toList());
+    }
 }

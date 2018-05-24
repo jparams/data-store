@@ -23,7 +23,7 @@ import com.jparams.store.reference.ReferenceManager;
 public abstract class AbstractStore<V> extends AbstractCollection<V> implements Store<V>
 {
     private final ReferenceManager<V> referenceManager;
-    private final Map<String, AbstractIndex<V>> indexMap;
+    private final Map<String, AbstractIndex<?, V>> indexMap;
 
     protected AbstractStore(final ReferenceManager<V> referenceManager)
     {
@@ -31,7 +31,7 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
         this.indexMap = new HashMap<>();
     }
 
-    protected AbstractStore(final ReferenceManager<V> referenceManager, final Set<AbstractIndex<V>> indexes)
+    protected AbstractStore(final ReferenceManager<V> referenceManager, final Set<AbstractIndex<?, V>> indexes)
     {
         this.referenceManager = referenceManager;
         this.indexMap = indexes.stream().collect(Collectors.toMap(AbstractIndex::getName, Function.identity()));
@@ -46,7 +46,7 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
             throw new IllegalArgumentException("An index already exists with this name");
         }
 
-        @SuppressWarnings("unchecked") final AbstractIndex<V> newIndex = createIndex(indexName, (KeyProvider<Object, V>) keyProvider, (Comparison<Object>) comparison);
+        final AbstractIndex<K, V> newIndex = createIndex(indexName, keyProvider, comparison);
         indexMap.put(indexName, newIndex);
         indexReferences(Collections.singleton(newIndex), referenceManager.getReferences());
         return newIndex;
@@ -185,17 +185,17 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
         return createCopy(referenceManager, indexMap.values());
     }
 
-    protected abstract Store<V> createCopy(final ReferenceManager<V> referenceManager, final Collection<AbstractIndex<V>> indexes);
+    protected abstract Store<V> createCopy(final ReferenceManager<V> referenceManager, final Collection<AbstractIndex<?, V>> indexes);
 
-    protected abstract AbstractIndex<V> createIndex(String indexName, KeyProvider<Object, V> keyProvider, Comparison<Object> comparison);
+    protected abstract <K> AbstractIndex<K, V> createIndex(String indexName, KeyProvider<K, V> keyProvider, Comparison<K> comparison);
 
-    private static <T> void indexReferences(final Collection<AbstractIndex<T>> indexes, final Collection<Reference<T>> references)
+    private static <T> void indexReferences(final Collection<AbstractIndex<?, T>> indexes, final Collection<Reference<T>> references)
     {
         final List<IndexCreationException> exceptions = new ArrayList<>();
 
         for (final Reference<T> reference : references)
         {
-            for (final AbstractIndex<T> index : indexes)
+            for (final AbstractIndex<?, T> index : indexes)
             {
                 try
                 {

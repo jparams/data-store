@@ -6,12 +6,12 @@ import com.jparams.store.reference.ReferenceFactory;
 /**
  * Factory for creating in memory references
  *
- * @param <T>
+ * @param <V> value type
  */
-public class MemoryReferenceFactory<T> implements ReferenceFactory<T>
+public class MemoryReferenceFactory<V> implements ReferenceFactory<V>
 {
     @Override
-    public Reference<T> createReference(final T obj)
+    public Reference<V> createReference(final V obj)
     {
         return new MemoryReference<>(obj);
     }

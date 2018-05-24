@@ -8,12 +8,14 @@ import java.util.Set;
 
 /**
  * Key mappings from a single value
+ *
+ * @param <K> key type
  */
-public final class Key<T>
+public final class Key<K>
 {
-    private final Set<Object> values;
+    private final Set<K> values;
 
-    private Key(final Collection<T> values)
+    private Key(final Collection<K> values)
     {
         this.values = new HashSet<>(values);
     }
@@ -23,7 +25,7 @@ public final class Key<T>
      *
      * @return list of keyed values
      */
-    public Set<Object> getValues()
+    public Set<K> getValues()
     {
         return Collections.unmodifiableSet(values);
     }
@@ -31,10 +33,10 @@ public final class Key<T>
     /**
      * Create empty values
      *
-     * @param <T> type
+     * @param <K> type
      * @return values
      */
-    public static <T> Key<T> none()
+    public static <K> Key<K> none()
     {
         return new Key<>(Collections.emptyList());
     }
@@ -43,9 +45,10 @@ public final class Key<T>
      * Add another key mapping
      *
      * @param key key
+     * @param <K> key type
      * @return this
      */
-    public static <T> Key<T> on(final T key)
+    public static <K> Key<K> on(final K key)
     {
         return new Key<>(Collections.singletonList(key));
     }
@@ -54,11 +57,11 @@ public final class Key<T>
      * Create values with default values
      *
      * @param keys key values
-     * @param <T>  type
+     * @param <K>  key type
      * @return values
      */
     @SafeVarargs
-    public static <T> Key<T> onEach(final T... keys)
+    public static <K> Key<K> onEach(final K... keys)
     {
         return new Key<>(Arrays.asList(keys));
     }
@@ -67,10 +70,10 @@ public final class Key<T>
      * Create values with default values
      *
      * @param keys key values
-     * @param <T>  type
+     * @param <K>  key type
      * @return values
      */
-    public static <T> Key<T> onEach(final Collection<T> keys)
+    public static <K> Key<K> onEach(final Collection<K> keys)
     {
         return new Key<>(keys);
     }

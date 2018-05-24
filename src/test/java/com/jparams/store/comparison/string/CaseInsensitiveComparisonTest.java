@@ -25,6 +25,6 @@ public class CaseInsensitiveComparisonTest
     @Test
     public void testGetComparable()
     {
-        assertThat(subject.getComparable("AbCd")).isEqualTo("abcd");
+        assertThat(subject.createComparable("AbCd")).isEqualTo("abcd");
     }
 }

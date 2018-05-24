@@ -9,19 +9,24 @@ import com.jparams.store.comparison.Comparison;
 import com.jparams.store.index.Index;
 import com.jparams.store.index.SynchronizedIndex;
 
-public class SynchronizedStore<T> implements Store<T>
+/**
+ * Synchronized (thread-safe) store backed by given store.
+ *
+ * @param <V> value type
+ */
+public class SynchronizedStore<V> implements Store<V>
 {
-    private final Store<T> store;
+    private final Store<V> store;
     private final Object mutex;
 
-    SynchronizedStore(final Store<T> store)
+    SynchronizedStore(final Store<V> store)
     {
         this.store = store;
         this.mutex = this;
     }
 
     @Override
-    public <K> Index<T> index(final String indexName, final KeyProvider<K, T> keyProvider, final Comparison<K> comparison) throws IndexException
+    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison) throws IndexException
     {
         synchronized (mutex)
         {
@@ -30,11 +35,11 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public Index<T> getIndex(final String indexName)
+    public Index<V> getIndex(final String indexName)
     {
         synchronized (mutex)
         {
-            final Index<T> index = store.getIndex(indexName);
+            final Index<V> index = store.getIndex(indexName);
 
             if (index == null)
             {
@@ -46,7 +51,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public Collection<Index<T>> getIndexes()
+    public Collection<Index<V>> getIndexes()
     {
         synchronized (mutex)
         {
@@ -55,13 +60,13 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public boolean removeIndex(final Index<T> index)
+    public boolean removeIndex(final Index<V> index)
     {
         synchronized (mutex)
         {
             if (index instanceof SynchronizedIndex)
             {
-                return store.removeIndex(((SynchronizedIndex<T>) index).getIndex());
+                return store.removeIndex(((SynchronizedIndex<V>) index).getIndex());
             }
             else
             {
@@ -89,7 +94,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public void reindex(final Collection<T> items)
+    public void reindex(final Collection<V> items)
     {
         synchronized (mutex)
         {
@@ -98,7 +103,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public void reindex(final T item)
+    public void reindex(final V item)
     {
         synchronized (mutex)
         {
@@ -107,7 +112,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public Store<T> copy()
+    public Store<V> copy()
     {
         synchronized (mutex)
         {
@@ -143,7 +148,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public Iterator<T> iterator()
+    public Iterator<V> iterator()
     {
         return store.iterator();
     }
@@ -167,7 +172,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public boolean add(final T item)
+    public boolean add(final V item)
     {
         synchronized (mutex)
         {
@@ -194,7 +199,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public boolean addAll(final Collection<? extends T> collection)
+    public boolean addAll(final Collection<? extends V> collection)
     {
         synchronized (mutex)
         {
@@ -212,7 +217,7 @@ public class SynchronizedStore<T> implements Store<T>
     }
 
     @Override
-    public boolean removeIf(final Predicate<? super T> filter)
+    public boolean removeIf(final Predicate<? super V> filter)
     {
         synchronized (mutex)
         {
@@ -238,7 +243,7 @@ public class SynchronizedStore<T> implements Store<T>
         }
     }
 
-    public Store<T> getStore()
+    public Store<V> getStore()
     {
         return store;
     }

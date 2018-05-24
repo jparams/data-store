@@ -14,7 +14,7 @@ public class DefaultComparison<V> implements Comparison<V>
     }
 
     @Override
-    public Object getComparable(final V item)
+    public Object createComparable(final V item)
     {
         return item;
     }

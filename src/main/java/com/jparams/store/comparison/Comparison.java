@@ -1,5 +1,10 @@
 package com.jparams.store.comparison;
 
+/**
+ * Transforms a given key into a comparable key.
+ *
+ * @param <T> type
+ */
 public interface Comparison<T>
 {
     /**
@@ -13,8 +18,8 @@ public interface Comparison<T>
     /**
      * Transform the given item into the comparable type
      *
-     * @param item
+     * @param item item
      * @return comparable
      */
-    Object getComparable(T item);
+    Object createComparable(T item);
 }

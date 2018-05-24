@@ -4,6 +4,9 @@ import java.util.Locale;
 
 import com.jparams.store.comparison.Comparison;
 
+/**
+ * Case insensitive string comparison strategy
+ */
 public class CaseInsensitiveComparison implements Comparison<String>
 {
     @Override
@@ -13,7 +16,7 @@ public class CaseInsensitiveComparison implements Comparison<String>
     }
 
     @Override
-    public Object getComparable(final String item)
+    public Object createComparable(final String item)
     {
         return item.toLowerCase(Locale.getDefault());
     }
