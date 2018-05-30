@@ -1,36 +1,132 @@
 package com.jparams.store;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
+
+import com.jparams.store.comparison.ComparisonPolicy;
+import com.jparams.store.comparison.DefaultComparisonPolicy;
+import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexException;
 
 /**
  * Store of data
  *
- * @param <T> data type
+ * @param <V> value type
  */
-public interface Store<T> extends Collection<T>
+public interface Store<V> extends Collection<V>
 {
     /**
-     * Create and register a new index with this store
+     * Register a new index with this store, mapping a single value to a collection of indexed keys
      *
-     * @param indexName              unique index name for this store
-     * @param valueToKeysTransformer function to transform a value to one or more keys
-     * @param <K>                    key type
+     * @param indexName        unique index name for this store
+     * @param keyProvider      function to provide a value to one or more keys to index on
+     * @param comparisonPolicy comparison strategy
+     * @param <K>              key type
      * @return index
      * @throws IndexException thrown if the new index failed with exceptions.
      */
-    <K> Index<T> addIndex(String indexName, Transformer<T, K> valueToKeysTransformer) throws IndexException;
+    <K> Index<V> multiIndex(String indexName, KeyProvider<Collection<K>, V> keyProvider, ComparisonPolicy<K> comparisonPolicy) throws IndexException;
 
     /**
-     * Create and register a new index with this store. This will generate an index with a generated name, to specify an index name, call {@link Store#addIndex(String, Transformer)}
+     * Register a new index with this store, mapping a single value to a collection of indexed keys
      *
-     * @param valueToKeysTransformer function to transform a value to one or more keys
-     * @param <K>                    key type
+     * @param indexName   unique index name for this store
+     * @param keyProvider function to provide a value to one or more keys
+     * @param <K>         key type
      * @return index
      * @throws IndexException thrown if the new index failed with exceptions.
      */
-    <K> Index<T> addIndex(Transformer<T, K> valueToKeysTransformer) throws IndexException;
+    default <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
+    {
+        return multiIndex(indexName, keyProvider, new DefaultComparisonPolicy<>());
+    }
+
+    /**
+     * Register a new index with this store, mapping a single value to a collection of indexed keys
+     *
+     * @param keyProvider      function to provide a value to one or more keys
+     * @param comparisonPolicy comparison strategy
+     * @param <K>              key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
+    {
+        return multiIndex(UUID.randomUUID().toString(), keyProvider, comparisonPolicy);
+    }
+
+    /**
+     * Register a new index with this store, mapping a single value to a collection of indexed keys
+     *
+     * @param keyProvider function to provide a value to one or more keys
+     * @param <K>         key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
+    {
+        return multiIndex(UUID.randomUUID().toString(), keyProvider, new DefaultComparisonPolicy<>());
+    }
+
+    /**
+     * Register a new index with this store
+     *
+     * @param indexName        unique index name for this store
+     * @param keyProvider      function to provide a value to one or more keys to index on
+     * @param comparisonPolicy comparison strategy
+     * @param <K>              key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
+    {
+        return multiIndex(indexName, value -> Collections.singletonList(keyProvider.provide(value)), comparisonPolicy);
+    }
+
+    /**
+     * Register a new index with this store
+     *
+     * @param indexName   unique index name for this store
+     * @param keyProvider function to provide a value to one or more keys
+     * @param <K>         key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider) throws IndexException
+    {
+        return index(indexName, keyProvider, new DefaultComparisonPolicy<>());
+    }
+
+    /**
+     * Register a new index with this store.
+     *
+     * @param keyProvider      function to provide a value to one or more keys
+     * @param comparisonPolicy comparison strategy
+     * @param <K>              key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> index(final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
+    {
+        return index(UUID.randomUUID().toString(), keyProvider, comparisonPolicy);
+    }
+
+    /**
+     * Create and register a new index with this store.
+     *
+     * @param keyProvider function to provide a value to one or more keys
+     * @param <K>         key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> index(final KeyProvider<K, V> keyProvider) throws IndexException
+    {
+        return index(UUID.randomUUID().toString(), keyProvider, new DefaultComparisonPolicy<>());
+    }
 
     /**
      * Find index with name. This is the same as {@link Store#findIndex(String)}, but returns a null instead of an optional if an index cannot be found.
@@ -38,14 +134,14 @@ public interface Store<T> extends Collection<T>
      * @param indexName name of index to lookup
      * @return index
      */
-    Index<T> getIndex(String indexName);
+    Index<V> getIndex(String indexName);
 
     /**
      * Get all indexes
      *
      * @return indexes
      */
-    Collection<Index<T>> getIndexes();
+    Collection<Index<V>> getIndexes();
 
     /**
      * Remove all indexes associated with this store
@@ -61,7 +157,7 @@ public interface Store<T> extends Collection<T>
      * @param indexName name of index to lookup
      * @return index optional
      */
-    default Optional<Index<T>> findIndex(final String indexName)
+    default Optional<Index<V>> findIndex(final String indexName)
     {
         return Optional.ofNullable(getIndex(indexName));
     }
@@ -80,7 +176,7 @@ public interface Store<T> extends Collection<T>
      * @param index index to remove
      * @return true if removed successfully
      */
-    boolean removeIndex(Index<T> index);
+    boolean removeIndex(Index<V> index);
 
     /**
      * Clear the existing indexes and reindex the entire store. This can be a slow operation
@@ -98,7 +194,7 @@ public interface Store<T> extends Collection<T>
      * @param items items to reindex
      * @throws IndexException thrown if one or more indexes failed with exceptions.
      */
-    void reindex(Collection<T> items) throws IndexException;
+    void reindex(Collection<V> items) throws IndexException;
 
     /**
      * Reindex a particular item. This method will need to be called anytime a change
@@ -108,29 +204,42 @@ public interface Store<T> extends Collection<T>
      * @param item item to reindex
      * @throws IndexException thrown if one or more indexes failed with exceptions.
      */
-    void reindex(final T item) throws IndexException;
+    void reindex(final V item) throws IndexException;
 
     /**
      * Adds an item to the store and indexes it. If the item already exists in the store,
      * it will be reindexed.
      *
-     * @param item item to add
+     * @param item item to on
      * @return true if item did not previously exist in the store.
      * @throws IndexException thrown if one or more indexes failed with exceptions.
      */
     @Override
-    boolean add(T item) throws IndexException;
+    boolean add(V item) throws IndexException;
 
     /**
-     * Adds all item sto the store and indexes them. If an item already exists in the store,
+     * Adds all item to the store and indexes them. If an item already exists in the store,
      * it will be reindexed.
      *
-     * @param items items to add
+     * @param items items to on
      * @return true if one or more items did not previously exist in the store.
      * @throws IndexException thrown if one or more indexes failed with exceptions.
      */
     @Override
-    boolean addAll(Collection<? extends T> items) throws IndexException;
+    boolean addAll(Collection<? extends V> items) throws IndexException;
+
+    /**
+     * Adds all item to the store and indexes them. If an item already exists in the store,
+     * it will be re-indexed.
+     *
+     * @param items items to on
+     * @return true if one or more items did not previously exist in the store.
+     * @throws IndexException thrown if one or more indexes failed with exceptions.
+     */
+    default boolean addAll(final V[] items) throws IndexException
+    {
+        return addAll(Arrays.asList(items));
+    }
 
     /**
      * Create a copy of this store. This can be an expensive operation depending
@@ -140,7 +249,7 @@ public interface Store<T> extends Collection<T>
      *
      * @return copy
      */
-    Store<T> copy();
+    Store<V> copy();
 
     /**
      * Returns an unmodifiable view of this store. This method allows
@@ -152,7 +261,7 @@ public interface Store<T> extends Collection<T>
      *
      * @return an unmodifiable view of this store.
      */
-    default Store<T> unmodifiableStore()
+    default Store<V> unmodifiableStore()
     {
         return new UnmodifiableStore<>(this);
     }
@@ -180,14 +289,8 @@ public interface Store<T> extends Collection<T>
      *
      * @return synchronized store
      */
-    default Store<T> synchronizedStore()
+    default Store<V> synchronizedStore()
     {
-        if (this instanceof SynchronizedStore)
-        {
-            final Store<T> store = ((SynchronizedStore<T>) this).getStore();
-            return new SynchronizedStore<>(store);
-        }
-
         return new SynchronizedStore<>(this);
     }
 }

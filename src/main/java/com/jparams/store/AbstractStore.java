@@ -10,61 +10,62 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class AbstractStore<T> extends AbstractCollection<T> implements Store<T>
-{
-    private final ReferenceManager<T> referenceManager;
-    private final Map<String, AbstractIndex<T>> indexMap;
+import com.jparams.store.comparison.ComparisonPolicy;
+import com.jparams.store.index.AbstractIndex;
+import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexCreationException;
+import com.jparams.store.index.IndexException;
+import com.jparams.store.reference.Reference;
+import com.jparams.store.reference.ReferenceManager;
 
-    AbstractStore(final ReferenceManager<T> referenceManager)
+public abstract class AbstractStore<V> extends AbstractCollection<V> implements Store<V>
+{
+    private final ReferenceManager<V> referenceManager;
+    private final Map<String, AbstractIndex<?, V>> indexMap;
+
+    protected AbstractStore(final ReferenceManager<V> referenceManager)
     {
         this.referenceManager = referenceManager;
         this.indexMap = new HashMap<>();
     }
 
-    AbstractStore(final ReferenceManager<T> referenceManager, final Set<AbstractIndex<T>> indexes)
+    protected AbstractStore(final ReferenceManager<V> referenceManager, final Set<AbstractIndex<?, V>> indexes)
     {
         this.referenceManager = referenceManager;
         this.indexMap = indexes.stream().collect(Collectors.toMap(AbstractIndex::getName, Function.identity()));
     }
 
     @Override
-    public <K> Index<T> addIndex(final String indexName, final Transformer<T, K> transformer)
+    public <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
     {
         if (indexMap.containsKey(indexName))
         {
             throw new IllegalArgumentException("An index already exists with this name");
         }
 
-        final AbstractIndex<T> newIndex = createIndex(indexName, transformer);
+        final AbstractIndex<K, V> newIndex = createIndex(indexName, keyProvider, comparisonPolicy);
         indexMap.put(indexName, newIndex);
         indexReferences(Collections.singleton(newIndex), referenceManager.getReferences());
         return newIndex;
     }
 
     @Override
-    public <K> Index<T> addIndex(final Transformer<T, K> transformer)
-    {
-        return addIndex(UUID.randomUUID().toString(), transformer);
-    }
-
-    @Override
-    public Index<T> getIndex(final String indexName)
+    public Index<V> getIndex(final String indexName)
     {
         return indexMap.get(indexName);
     }
 
     @Override
-    public Collection<Index<T>> getIndexes()
+    public Collection<Index<V>> getIndexes()
     {
         return Collections.unmodifiableCollection(indexMap.values());
     }
 
     @Override
-    public boolean removeIndex(final Index<T> index)
+    public boolean removeIndex(final Index<V> index)
     {
         if (index.equals(indexMap.get(index.getName())))
         {
@@ -88,13 +89,13 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     }
 
     @Override
-    public void reindex(final T item)
+    public void reindex(final V item)
     {
         reindex(Collections.singleton(item));
     }
 
     @Override
-    public void reindex(final Collection<T> items)
+    public void reindex(final Collection<V> items)
     {
         indexReferences(indexMap.values(), items.stream()
                                                 .map(referenceManager::findReference)
@@ -122,20 +123,20 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     }
 
     @Override
-    public Iterator<T> iterator()
+    public Iterator<V> iterator()
     {
         return new StoreIterator(referenceManager.getReferences().iterator());
     }
 
     @Override
-    public boolean addAll(final Collection<? extends T> collection)
+    public boolean addAll(final Collection<? extends V> collection)
     {
-        final List<Reference<T>> references = new ArrayList<>();
+        final List<Reference<V>> references = new ArrayList<>();
         boolean changed = false;
 
-        for (final T item : collection)
+        for (final V item : collection)
         {
-            final Optional<Reference<T>> existingReference = referenceManager.findReference(item);
+            final Optional<Reference<V>> existingReference = referenceManager.findReference(item);
 
             if (existingReference.isPresent())
             {
@@ -152,7 +153,7 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     }
 
     @Override
-    public boolean add(final T item)
+    public boolean add(final V item)
     {
         return addAll(Collections.singleton(item));
     }
@@ -160,7 +161,7 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     @Override
     public boolean remove(final Object obj)
     {
-        final Reference<T> reference = referenceManager.remove(obj);
+        final Reference<V> reference = referenceManager.remove(obj);
 
         if (reference != null)
         {
@@ -179,22 +180,27 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
     }
 
     @Override
-    public Store<T> copy()
+    public Store<V> copy()
     {
         return createCopy(referenceManager, indexMap.values());
     }
 
-    protected abstract Store<T> createCopy(final ReferenceManager<T> referenceManager, final Collection<AbstractIndex<T>> indexes);
+    protected abstract Store<V> createCopy(final ReferenceManager<V> referenceManager, final Collection<AbstractIndex<?, V>> indexes);
 
-    protected abstract AbstractIndex<T> createIndex(final String indexName, final Transformer<T, ?> transformer);
+    protected abstract <K> AbstractIndex<K, V> createIndex(String indexName, KeyProvider<Collection<K>, V> keyProvider, ComparisonPolicy<K> comparisonPolicy);
 
-    private static <T> void indexReferences(final Collection<AbstractIndex<T>> indexes, final Collection<Reference<T>> references)
+    protected ReferenceManager<V> getReferenceManager()
+    {
+        return referenceManager;
+    }
+
+    private static <T> void indexReferences(final Collection<AbstractIndex<?, T>> indexes, final Collection<Reference<T>> references)
     {
         final List<IndexCreationException> exceptions = new ArrayList<>();
 
         for (final Reference<T> reference : references)
         {
-            for (final AbstractIndex<T> index : indexes)
+            for (final AbstractIndex<?, T> index : indexes)
             {
                 try
                 {
@@ -214,12 +220,12 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
         }
     }
 
-    private class StoreIterator implements Iterator<T>
+    private class StoreIterator implements Iterator<V>
     {
-        private final Iterator<Reference<T>> iterator;
-        private Reference<T> previous;
+        private final Iterator<Reference<V>> iterator;
+        private Reference<V> previous;
 
-        StoreIterator(final Iterator<Reference<T>> iterator)
+        StoreIterator(final Iterator<Reference<V>> iterator)
         {
             this.iterator = iterator;
         }
@@ -231,7 +237,7 @@ public abstract class AbstractStore<T> extends AbstractCollection<T> implements 
         }
 
         @Override
-        public T next()
+        public V next()
         {
             previous = iterator.next();
             return previous.get();
