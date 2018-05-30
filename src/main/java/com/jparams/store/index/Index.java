@@ -2,13 +2,9 @@ package com.jparams.store.index;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.jparams.store.Store;
 
 /**
- * Index applied to a {@link Store}
+ * Index applied to a {@link com.jparams.store.Store}
  *
  * @param <V> value type
  */
@@ -47,21 +43,4 @@ public interface Index<V>
      * @return index names
      */
     String getName();
-
-    /**
-     * Return all keys held by the index
-     *
-     * @return keys
-     */
-    Set<Object> getKeys();
-
-    /**
-     * Return all entries in index
-     *
-     * @return entry of key and values
-     */
-    default List<Entry<V>> getEntries()
-    {
-        return getKeys().stream().map(key -> new Entry<>(key, this)).collect(Collectors.toList());
-    }
 }

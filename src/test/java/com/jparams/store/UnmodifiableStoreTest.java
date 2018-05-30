@@ -1,7 +1,9 @@
 package com.jparams.store;
 
 import java.util.Collections;
+import java.util.Optional;
 
+import com.jparams.store.comparison.DefaultComparisonPolicy;
 import com.jparams.store.index.Index;
 
 import org.junit.Before;
@@ -12,6 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +37,13 @@ public class UnmodifiableStoreTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIndexWithNameAndProviderAndComparison()
+    public void testIndexWithProviderAndComparisonPolicy()
+    {
+        subject.index(null, new DefaultComparisonPolicy<>());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testIndexWithNameAndProviderAndComparisonPolicy()
     {
         subject.index(null, null, null);
     }
@@ -46,9 +55,39 @@ public class UnmodifiableStoreTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIndexProvider()
+    public void testIndexWithProvider()
     {
         subject.index(null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testMultiIndexWithProviderAndComparisonPolicy()
+    {
+        subject.multiIndex(null, new DefaultComparisonPolicy<>());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testMultiIndexWithNameAndProviderAndComparisonPolicy()
+    {
+        subject.multiIndex(null, null, null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testMultiIndexWithNameAndProvider()
+    {
+        subject.multiIndex("", null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testMultiIndexWithProvider()
+    {
+        subject.multiIndex(null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRemoveAllIndexes()
+    {
+        subject.removeAllIndexes();
     }
 
     @Test
@@ -59,6 +98,16 @@ public class UnmodifiableStoreTest
         assertThat(subject.getIndex("abc")).isSameAs(mockIndex);
 
         verify(mockStore).getIndex("abc");
+    }
+
+    @Test
+    public void testFindIndex()
+    {
+        when(mockStore.findIndex(anyString())).thenReturn(Optional.of(mockIndex));
+
+        assertThat(subject.findIndex("abc")).hasValue(mockIndex);
+
+        verify(mockStore).findIndex("abc");
     }
 
     @Test
@@ -148,51 +197,94 @@ public class UnmodifiableStoreTest
     @Test
     public void testToArray()
     {
+        final Object[] array = new Object[]{};
+        when(mockStore.toArray()).thenReturn(array);
+        assertThat(subject.toArray()).isSameAs(array);
+        verify(mockStore).toArray();
     }
 
     @Test
-    public void testToArray1()
+    public void testToArrayOfType()
     {
+        final String[] array = new String[]{};
+        when(mockStore.toArray(array)).thenReturn(array);
+        assertThat(subject.toArray(array)).isSameAs(array);
+        verify(mockStore).toArray(array);
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void testAdd()
     {
+        subject.add("");
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void testRemove()
     {
+        subject.remove("");
     }
 
     @Test
     public void testContainsAll()
     {
+        when(mockStore.containsAll(anyList())).thenReturn(true);
+        assertThat(subject.containsAll(Collections.emptyList())).isEqualTo(true);
+        verify(mockStore).containsAll(Collections.emptyList());
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void testAddAll()
     {
+        subject.addAll(Collections.singleton(""));
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAddArray()
+    {
+        subject.addAll(new String[]{});
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
     public void testRemoveAll()
     {
+        subject.removeAll(Collections.singleton(""));
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void testRetainAll()
     {
+        subject.retainAll(Collections.singleton(""));
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void testClear()
     {
+        subject.clear();
     }
 
     @Test
     public void testCopy()
     {
+        when(mockStore.copy()).thenReturn(mockStore);
+        assertThat(subject.copy()).isSameAs(mockStore);
+        verify(mockStore).copy();
+    }
+
+    @Test
+    public void testSynchronizedStore()
+    {
+        when(mockStore.synchronizedStore()).thenReturn(mockStore);
+        when(mockStore.unmodifiableStore()).thenReturn(mockStore);
+        assertThat(subject.synchronizedStore()).isSameAs(mockStore);
+        verify(mockStore).synchronizedStore();
+        verify(mockStore).unmodifiableStore();
+    }
+
+    @Test
+    public void testToString()
+    {
+        when(mockStore.toString()).thenReturn("abc");
+        assertThat(subject.toString()).isEqualTo("abc");
     }
 
     @Test

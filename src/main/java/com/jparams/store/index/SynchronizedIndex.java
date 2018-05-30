@@ -3,7 +3,6 @@ package com.jparams.store.index;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 public class SynchronizedIndex<T> implements Index<T>
 {
@@ -14,6 +13,15 @@ public class SynchronizedIndex<T> implements Index<T>
     {
         this.index = index;
         this.mutex = mutex;
+    }
+
+    @Override
+    public T getFirst(final Object key)
+    {
+        synchronized (mutex)
+        {
+            return index.getFirst(key);
+        }
     }
 
     @Override
@@ -38,15 +46,6 @@ public class SynchronizedIndex<T> implements Index<T>
     public String getName()
     {
         return index.getName();
-    }
-
-    @Override
-    public Set<Object> getKeys()
-    {
-        synchronized (mutex)
-        {
-            return index.getKeys();
-        }
     }
 
     public Index<T> getIndex()
@@ -76,5 +75,11 @@ public class SynchronizedIndex<T> implements Index<T>
     public int hashCode()
     {
         return Objects.hash(index, mutex);
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.valueOf(index);
     }
 }

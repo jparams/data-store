@@ -1,5 +1,6 @@
 package com.jparams.store.index;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -11,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jparams.store.KeyProvider;
-import com.jparams.store.comparison.Comparison;
+import com.jparams.store.comparison.ComparisonPolicy;
 import com.jparams.store.reference.Reference;
 
 /**
@@ -24,16 +25,16 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
     private final Map<Object, Set<Reference<V>>> keyToReferenceMap;
     private final Map<Reference<V>, Set<Object>> referenceToKeysMap;
 
-    public ReferenceIndex(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison)
+    public ReferenceIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy)
     {
-        super(indexName, keyProvider, comparison);
+        super(indexName, keyProvider, comparisonPolicy);
         this.keyToReferenceMap = new HashMap<>();
         this.referenceToKeysMap = new HashMap<>();
     }
 
-    private ReferenceIndex(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison, final Map<Object, Set<Reference<V>>> keyToReferenceMap, final Map<Reference<V>, Set<Object>> referenceToKeysMap)
+    private ReferenceIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy, final Map<Object, Set<Reference<V>>> keyToReferenceMap, final Map<Reference<V>, Set<Object>> referenceToKeysMap)
     {
-        super(indexName, keyProvider, comparison);
+        super(indexName, keyProvider, comparisonPolicy);
         this.keyToReferenceMap = keyToReferenceMap;
         this.referenceToKeysMap = referenceToKeysMap;
     }
@@ -64,12 +65,6 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
         }
 
         return references.stream().map(Reference::get).collect(Collectors.toList());
-    }
-
-    @Override
-    public Set<Object> getKeys()
-    {
-        return keyToReferenceMap.keySet();
     }
 
     @Override
@@ -115,7 +110,7 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
     }
 
     @Override
-    protected AbstractIndex<K, V> copy(final String name, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison)
+    protected AbstractIndex<K, V> copy(final String name, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy)
     {
         final Map<Object, Set<Reference<V>>> keyToReferenceMapCopy = keyToReferenceMap.entrySet()
                                                                                       .stream()
@@ -123,7 +118,7 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
 
         final Map<Reference<V>, Set<Object>> referenceToKeysMapCopy = new HashMap<>(referenceToKeysMap);
 
-        return new ReferenceIndex<>(name, keyProvider, comparison, keyToReferenceMapCopy, referenceToKeysMapCopy);
+        return new ReferenceIndex<>(name, keyProvider, comparisonPolicy, keyToReferenceMapCopy, referenceToKeysMapCopy);
     }
 
     @Override

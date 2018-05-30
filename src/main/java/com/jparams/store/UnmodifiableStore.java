@@ -3,26 +3,94 @@ package com.jparams.store;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 
-import com.jparams.store.comparison.Comparison;
+import com.jparams.store.comparison.ComparisonPolicy;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexException;
 
 /**
  * Implementation of a store that cannot be modified
  *
  * @param <V> value type
  */
-class UnmodifiableStore<V> implements Store<V>
+public class UnmodifiableStore<V> implements Store<V>
 {
     private final Store<V> store;
 
-    UnmodifiableStore(final Store<V> store)
+    public UnmodifiableStore(final Store<V> store)
     {
         this.store = store;
     }
 
     @Override
-    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison) throws IndexException
+    public <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> index(final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> index(final KeyProvider<K, V> keyProvider) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeAllIndexes()
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Optional<Index<V>> findIndex(final String indexName)
+    {
+        return store.findIndex(indexName);
+    }
+
+    @Override
+    public boolean addAll(final V[] items) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Store<V> synchronizedStore()
+    {
+        return store.synchronizedStore().unmodifiableStore();
+    }
+
+    @Override
+    public <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
     {
         throw new UnsupportedOperationException();
     }
@@ -132,7 +200,7 @@ class UnmodifiableStore<V> implements Store<V>
     @Override
     public boolean addAll(final Collection<? extends V> collection)
     {
-        return store.addAll(collection);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -180,5 +248,11 @@ class UnmodifiableStore<V> implements Store<V>
     public int hashCode()
     {
         return Objects.hash(store);
+    }
+
+    @Override
+    public String toString()
+    {
+        return store.toString();
     }
 }

@@ -1,7 +1,7 @@
 package com.jparams.store;
 
 /**
- * Transform a given value into one or more keys for indexing
+ * Transform a given value into a key
  *
  * @param <K> key type
  * @param <V> value type
@@ -10,10 +10,10 @@ package com.jparams.store;
 public interface KeyProvider<K, V>
 {
     /**
-     * Index value to one or more keys. To exclude this item from indexing, return {@link Key#none()}.
+     * Index value to key or return null
      *
      * @param value value to transform into a key
      * @return key
      */
-    Key<K> provide(V value);
+    K provide(V value);
 }

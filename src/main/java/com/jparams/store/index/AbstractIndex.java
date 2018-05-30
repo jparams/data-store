@@ -1,24 +1,25 @@
 package com.jparams.store.index;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jparams.store.KeyProvider;
-import com.jparams.store.comparison.Comparison;
+import com.jparams.store.comparison.ComparisonPolicy;
 import com.jparams.store.reference.Reference;
 
 public abstract class AbstractIndex<K, V> implements Index<V>
 {
     private final String name;
-    private final KeyProvider<K, V> keyProvider;
-    private final Comparison<K> comparison;
+    private final KeyProvider<Collection<K>, V> keyProvider;
+    private final ComparisonPolicy<K> comparisonPolicy;
 
-    protected AbstractIndex(final String name, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison)
+    protected AbstractIndex(final String name, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy)
     {
         this.name = name;
         this.keyProvider = keyProvider;
-        this.comparison = comparison;
+        this.comparisonPolicy = comparisonPolicy;
     }
 
     protected Set<Object> generateKeys(final Reference<V> reference) throws IndexCreationException
@@ -37,7 +38,6 @@ public abstract class AbstractIndex<K, V> implements Index<V>
         try
         {
             return keyProvider.provide(item)
-                              .getValues()
                               .stream()
                               .map(this::getComparableKey)
                               .filter(Objects::nonNull)
@@ -51,12 +51,12 @@ public abstract class AbstractIndex<K, V> implements Index<V>
 
     protected Object getComparableKey(final Object key)
     {
-        if (key == null || !comparison.supports(key.getClass()))
+        if (key == null || !comparisonPolicy.supports(key.getClass()))
         {
             return null;
         }
 
-        @SuppressWarnings("unchecked") final Object comparableKey = comparison.createComparable((K) key);
+        @SuppressWarnings("unchecked") final Object comparableKey = comparisonPolicy.createComparable((K) key);
         return comparableKey;
     }
 
@@ -66,16 +66,22 @@ public abstract class AbstractIndex<K, V> implements Index<V>
 
     public abstract void clear();
 
-    protected abstract AbstractIndex<K, V> copy(String name, KeyProvider<K, V> keyProvider, Comparison<K> comparison);
+    protected abstract AbstractIndex<K, V> copy(String name, KeyProvider<Collection<K>, V> keyProvider, ComparisonPolicy<K> comparisonPolicy);
 
     public AbstractIndex<K, V> copy()
     {
-        return copy(name, keyProvider, comparison);
+        return copy(name, keyProvider, comparisonPolicy);
     }
 
     @Override
     public String getName()
     {
         return name;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Index[name='" + name + "\']";
     }
 }

@@ -13,10 +13,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.jparams.store.comparison.Comparison;
+import com.jparams.store.comparison.ComparisonPolicy;
 import com.jparams.store.index.AbstractIndex;
 import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexCreationException;
+import com.jparams.store.index.IndexException;
 import com.jparams.store.reference.Reference;
 import com.jparams.store.reference.ReferenceManager;
 
@@ -37,16 +38,15 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
         this.indexMap = indexes.stream().collect(Collectors.toMap(AbstractIndex::getName, Function.identity()));
     }
 
-
     @Override
-    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final Comparison<K> comparison) throws IndexException
+    public <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
     {
         if (indexMap.containsKey(indexName))
         {
             throw new IllegalArgumentException("An index already exists with this name");
         }
 
-        final AbstractIndex<K, V> newIndex = createIndex(indexName, keyProvider, comparison);
+        final AbstractIndex<K, V> newIndex = createIndex(indexName, keyProvider, comparisonPolicy);
         indexMap.put(indexName, newIndex);
         indexReferences(Collections.singleton(newIndex), referenceManager.getReferences());
         return newIndex;
@@ -187,7 +187,12 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
 
     protected abstract Store<V> createCopy(final ReferenceManager<V> referenceManager, final Collection<AbstractIndex<?, V>> indexes);
 
-    protected abstract <K> AbstractIndex<K, V> createIndex(String indexName, KeyProvider<K, V> keyProvider, Comparison<K> comparison);
+    protected abstract <K> AbstractIndex<K, V> createIndex(String indexName, KeyProvider<Collection<K>, V> keyProvider, ComparisonPolicy<K> comparisonPolicy);
+
+    protected ReferenceManager<V> getReferenceManager()
+    {
+        return referenceManager;
+    }
 
     private static <T> void indexReferences(final Collection<AbstractIndex<?, T>> indexes, final Collection<Reference<T>> references)
     {

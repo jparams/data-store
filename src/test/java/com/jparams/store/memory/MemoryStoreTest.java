@@ -3,12 +3,11 @@ package com.jparams.store.memory;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import com.jparams.store.IndexException;
-import com.jparams.store.Key;
 import com.jparams.store.Store;
 import com.jparams.store.SynchronizedStore;
-import com.jparams.store.comparison.string.CaseInsensitiveComparison;
+import com.jparams.store.comparison.string.CaseInsensitiveComparisonPolicy;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexException;
 import com.jparams.store.index.ReferenceIndex;
 import com.jparams.store.index.SynchronizedIndex;
 import com.jparams.store.model.Person;
@@ -39,8 +38,8 @@ public class MemoryStoreTest
                 throw new RuntimeException("error indexing " + person.getFirstName());
             }
 
-            return Key.onEach(person.getFirstName());
-        }, new CaseInsensitiveComparison());
+            return person.getFirstName();
+        }, new CaseInsensitiveComparisonPolicy());
 
         person1 = createPerson("John", "Smith");
         subject.add(person1);
@@ -60,18 +59,51 @@ public class MemoryStoreTest
     }
 
     @Test
-    public void testAddIndex()
+    public void testAddMultiIndexWithProvider()
     {
-        final Index<Person> lastNameIndex = subject.index((person) -> Key.onEach(person.getLastName()));
+        final Index<Person> anyNameIndex = subject.multiIndex(person -> Arrays.asList(person.getFirstName(), person.getLastName()));
+        assertThat(anyNameIndex.getFirst("John")).isSameAs(person1);
+        assertThat(anyNameIndex.getFirst("Smith")).isSameAs(person1);
+        assertThat(anyNameIndex.get("James")).containsExactly(person2, person3);
+        assertThat(anyNameIndex.get("Johnson")).containsExactly(person2, person3);
+        assertThat(anyNameIndex.get("Random")).isEmpty();
+    }
+
+    @Test
+    public void testAddIndexWithProvider()
+    {
+        final Index<Person> lastNameIndex = subject.index(Person::getLastName);
         assertThat(lastNameIndex.getFirst("Smith")).isSameAs(person1);
         assertThat(lastNameIndex.get("Johnson")).containsExactly(person2, person3);
+        assertThat(lastNameIndex.get("Random")).isEmpty();
+    }
+
+    @Test
+    public void testAddIndexWithNameAndProvider()
+    {
+        subject.index("lastName", Person::getLastName);
+
+        final Index<Person> lastNameIndex = subject.getIndex("lastName");
+        assertThat(lastNameIndex.getFirst("Smith")).isSameAs(person1);
+        assertThat(lastNameIndex.get("Johnson")).containsExactly(person2, person3);
+        assertThat(lastNameIndex.get("Random")).isEmpty();
+    }
+
+    @Test
+    public void testAddIndexWithNameAndProviderAndPolicy()
+    {
+        subject.index("lastName", Person::getLastName, new CaseInsensitiveComparisonPolicy());
+
+        final Index<Person> lastNameIndex = subject.getIndex("lastName");
+        assertThat(lastNameIndex.getFirst("smith")).isSameAs(person1);
+        assertThat(lastNameIndex.get("JOHNson")).containsExactly(person2, person3);
         assertThat(lastNameIndex.get("Random")).isEmpty();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddDuplicateIndex()
     {
-        assertThat(subject.index(firstNameIndex.getName(), person -> Key.on(person.getFirstName())));
+        assertThat(subject.index(firstNameIndex.getName(), Person::getFirstName));
     }
 
     @Test
@@ -351,6 +383,12 @@ public class MemoryStoreTest
         assertThat(synchronizedStore).isExactlyInstanceOf(SynchronizedStore.class);
         assertThat(synchronizedStore.getIndex("firstName")).isExactlyInstanceOf(SynchronizedIndex.class);
         assertThat(((SynchronizedStore<?>) synchronizedStore).getStore()).isSameAs(subject);
+    }
+
+    @Test
+    public void toToString()
+    {
+        assertThat(subject.toString()).isEqualTo("[Person{id=null, firstName='John', lastName='Smith', email='null', gender=null, ipAddress='null'}, Person{id=null, firstName='James', lastName='Johnson', email='null', gender=null, ipAddress='null'}, Person{id=null, firstName='James', lastName='Johnson', email='null', gender=null, ipAddress='null'}]");
     }
 
     private Person createPerson(final String firstName, final String lastName)

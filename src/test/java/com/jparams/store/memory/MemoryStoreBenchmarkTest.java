@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
-import com.jparams.store.Key;
 import com.jparams.store.Store;
 import com.jparams.store.index.Index;
 import com.jparams.store.model.Person;
@@ -42,7 +41,7 @@ public class MemoryStoreBenchmarkTest
     public void benchmarkIndexedLookup()
     {
         final Store<Person> store = new MemoryStore<>(shuffledTestData);
-        final Index<Person> index = store.index(value -> Key.onEach(value.getFirstName()));
+        final Index<Person> index = store.index(Person::getFirstName);
 
         for (final Person person : TEST_DATA)
         {
