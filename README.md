@@ -22,7 +22,7 @@ compile 'com.jparams:data-store:2.x.x'
 ```
 
 ### What is Data Store?
-Data Store is a full-featured indexed Java Collection capable of ultra-fast data lookup. But don't take my word for it, run the [benchmark](data-store/src/test/java/com/jparams/store/memory/MemoryStoreBenchmarkTest.java) yourself!
+Data Store is a full-featured indexed Java Collection capable of ultra-fast data lookup. But don't take my word for it, run the [benchmark](src/test/java/com/jparams/store/memory/MemoryStoreBenchmarkTest.java) yourself!
 
 Here is one I ran earlier...
 
