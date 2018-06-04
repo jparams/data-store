@@ -1,5 +1,6 @@
 package com.jparams.store;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -44,6 +45,31 @@ public class SynchronizedStoreTest
     public void setUp()
     {
         subject = new SynchronizedStore<>(mockStore);
+    }
+
+    @Test
+    public void testGetIndexedValues()
+    {
+        final ArrayList<String> list = new ArrayList<>();
+        when(mockStore.get(any(), any())).thenReturn(list);
+        assertThat(subject.get("index", "key")).isSameAs(list);
+        verify(mockStore).get("index", "key");
+    }
+
+    @Test
+    public void testGetFirstValue()
+    {
+        when(mockStore.getFirst(any(), any())).thenReturn("abc");
+        assertThat(subject.getFirst("index", "key")).isEqualTo("abc");
+        verify(mockStore).getFirst("index", "key");
+    }
+
+    @Test
+    public void testFindFirstValue()
+    {
+        when(mockStore.findFirst(any(), any())).thenReturn(Optional.of("abc"));
+        assertThat(subject.findFirst("index", "key")).hasValue("abc");
+        verify(mockStore).findFirst("index", "key");
     }
 
     @Test

@@ -36,7 +36,7 @@ public class MemoryStoreBenchmarkTest
         Collections.shuffle(shuffledTestData);
     }
 
-    @BenchmarkOptions(benchmarkRounds = 500, warmupRounds = 0)
+    @BenchmarkOptions(benchmarkRounds = 500, warmupRounds = 5)
     @Test
     public void benchmarkIndexedLookup()
     {
@@ -50,7 +50,7 @@ public class MemoryStoreBenchmarkTest
         }
     }
 
-    @BenchmarkOptions(benchmarkRounds = 500, warmupRounds = 0)
+    @BenchmarkOptions(benchmarkRounds = 500, warmupRounds = 5)
     @Test
     public void benchmarkLoopedLookup()
     {

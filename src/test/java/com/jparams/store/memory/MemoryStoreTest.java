@@ -163,8 +163,23 @@ public class MemoryStoreTest
     public void testGetIndexedData()
     {
         assertThat(firstNameIndex.getFirst("John")).isSameAs(person1);
+        assertThat(subject.getFirst("firstName", "John")).isSameAs(person1);
+
         assertThat(firstNameIndex.get("James")).containsExactly(person2, person3);
+        assertThat(subject.get("firstName", "James")).containsExactly(person2, person3);
+
         assertThat(firstNameIndex.get("Random")).isEmpty();
+        assertThat(subject.get("firstName", "Random")).isEmpty();
+    }
+
+    @Test
+    public void testFindIndexedData()
+    {
+        assertThat(firstNameIndex.findFirst("John")).hasValue(person1);
+        assertThat(subject.findFirst("firstName", "John")).hasValue(person1);
+
+        assertThat(firstNameIndex.findFirst("Random")).isEmpty();
+        assertThat(subject.findFirst("firstName", "Random")).isEmpty();
     }
 
     @Test
