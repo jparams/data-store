@@ -2,6 +2,7 @@ package com.jparams.store;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -21,6 +22,24 @@ public class UnmodifiableStore<V> implements Store<V>
     public UnmodifiableStore(final Store<V> store)
     {
         this.store = store;
+    }
+
+    @Override
+    public List<V> get(final String indexName, final Object key)
+    {
+        return store.get(indexName, key);
+    }
+
+    @Override
+    public V getFirst(final String indexName, final Object key)
+    {
+        return store.getFirst(indexName, key);
+    }
+
+    @Override
+    public Optional<V> findFirst(final String indexName, final Object key)
+    {
+        return store.findFirst(indexName, key);
     }
 
     @Override

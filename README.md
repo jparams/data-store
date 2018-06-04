@@ -12,61 +12,106 @@ Maven:
 <dependency>
     <groupId>com.jparams</groupId>
     <artifactId>data-store</artifactId>
-    <version>1.x.x</version>
+    <version>2.x.x</version>
 </dependency>
 ```
 
 Gradle:
 ```
-compile 'com.jparams:data-store:1.x.x'
+compile 'com.jparams:data-store:2.x.x'
 ```
 
 ### What is Data Store?
-Data Store is a full-featured indexed Java Collection capable of ultra-fast data lookup.
+Data Store is a full-featured indexed Java Collection capable of ultra-fast data lookup. But don't take my word for it, run the [benchmark](data-store/src/test/java/com/jparams/store/memory/MemoryStoreBenchmarkTest.java) yourself!
+
+Here is one I ran earlier...
+
+[image]
+
+Fast, huh!
+
+So how does it work? Well, Data Store, or “Store” for short, builds on top of java.util.Collection, providing a standard interface for adding, removing and iterating elements. This is where other implementation of java.util.Collection stop, but Data Store does a lot more. Data Store provides the ability to add multiple indexes on the elements stored in the collection. The indexing adds a slight overhead when adding elements into the collection, but makes element lookup ridiculously quick.
+
+Whilst indexing is the key functionality we are trying to promote with this library, we have made an effort to ensure that Data Store is a delight to use. Do you need a synchronized Data Store for your multi-threaded environment? How about an unmodifiable view of your Data Store? Maybe you just want to copy an existing Data Store quickly and easily? You can do all this and more!
 
 ### Create a Data Store
 Creating a Data Store is easy!
 
 ```java
-public class Application {
-    public static void main(String[] args) {
-        final Store<Person> personStore = new MemoryStore<>();
-        final Index<T> firstNameIndex = personStore.addIndex((person) -> Keys.create(person.getFirstName()));
-        final Index<T> lastNameIndex = personStore.addIndex((person) -> Keys.create(person.getLastName()));
-        final Index<T> firstOrLastNameIndex = personStore.addIndex((person) -> Keys.create(person.getFirstName(), person.getLastName()));
+Store<Person> store = new MemoryStore<>();
+```
 
-        personStore.add(new Person("John", "Smith"));
-        personStore.add(new Person("James", "Smith"));
-        personStore.add(new Person("Smith", "John"));
-        
-        firstNameIndex.getFirst("John"); // will return John Smith 
-        firstNameIndex.getFirst("James"); // will return James Smith
-        firstNameIndex.getFirst("Smith"); // will return Smith John
-        
-        lastNameIndex.get("Smith"); // will return John Smith and James Smith
-        lastNameIndex.getFirst("John"); // will return Smith James
+There we go, a shiny new Store has been created. Go ahead and use this as you would any other implementation of java.util.Collection. Add, remove, clear.. all the usual methods.
 
-        firstOrLastNameIndex.get("Smith"); // will return John Smith, James Smith and Smith John
-    }
-    
-    public static class Person {
-        private String firstName;
-        private String lastName;
-        
-        public Person(final String firstName, final String lastName) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-        }
-        
-        public String getFirstName() {
-            return firstName;
-        }
-        
-        public String getLastName() {
-            return lastName;
-        }
-    }
-}
+In case you were wondering, MemoryStore is the default implementation of the Store interface. It is a "Memory" Store because it holds all elements added to the Store in memory.
+
+### Using a Data Store
+Lets go ahead and use our Store. Here is some of the cool stuff you can do!
+
+#### Indexing
+Index your Store and enable ultra-fast data lookup. It is as simple as calling the `addIndex` method. Here goes.....
+
+```java
+store.addIndex("firstName", Person::getFirstName);
+```
+
+Easy, right?! With our index created, lets query some data and lets query them fast!
+
+```java
+List<Person> result1 = store.get("firstName", "James");
+```
+
+Data Store is backed by hash maps, so this lookup is quick. No looping required.
+
+#### Comparison Policy
+Lets build on top of the already powerful indexing feature by introducing Comparison Policies. These policies define how indexes are created and how they are matched.
+
+##### Case Insensitive Comparison Policy
+Use this policy for creating case insensitive indexes. Example:
+
+```java
+// Create a store
+Store<Person> store = new MemoryStore<>();
+
+// Add a case insensitive index
+Index<Person> index = store.addIndex(Person::getFirstName, new CaseInsensitiveComparisonPolicy());
+
+// Query index - these will produce the same result
+index.get("James");
+index.get("JAMES");
+index.get("james");
+index.get("JAMes");
+```
+
+##### Normalized Offset Date Time Comparison Policy
+Comparison policy for comparing two OffsetDateTime values normalized to an UTC time offset.
+
+```java
+// Create a store
+Store<Person> store = new MemoryStore<>();
+
+// Add a case insensitive index
+Index<Person> index = store.addIndex(Person::getLastActive, new NormalizedOffsetDateTimeComparisonPolicy());
+
+// Query index - these will produce the same result
+index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 13, 55, 30), ZoneOffset.ofHours(2)));
+index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 14, 55, 30), ZoneOffset.ofHours(3)));
+index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 15, 55, 30), ZoneOffset.ofHours(4)));
+```
+
+##### Normalized Zoned Date Time Comparison Policy
+Comparison policy for comparing two ZonedDateTime values normalized to an UTC timezone.
+
+```java
+// Create a store
+Store<Person> store = new MemoryStore<>();
+
+// Add a case insensitive index
+Index<Person> index = store.addIndex(Person::getLastActive, new NormalizedZonedDateTimeComparisonPolicy());
+
+// Query index - these will produce the same result
+index.get(LocalDateTime.of(2018, 5, 5, 13, 55, 30).atZone(ZoneId.of("Europe/London")));
+index.get(LocalDateTime.of(2018, 5, 5, 12, 55, 30).atZone(ZoneId.of("UTC")));
 ```
 
 ## Compatibility

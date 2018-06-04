@@ -2,6 +2,7 @@ package com.jparams.store;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -164,6 +165,33 @@ public class SynchronizedStore<V> implements Store<V>
         synchronized (mutex)
         {
             return store.removeIndex(indexName);
+        }
+    }
+
+    @Override
+    public List<V> get(final String indexName, final Object key)
+    {
+        synchronized (mutex)
+        {
+            return store.get(indexName, key);
+        }
+    }
+
+    @Override
+    public V getFirst(final String indexName, final Object key)
+    {
+        synchronized (mutex)
+        {
+            return store.getFirst(indexName, key);
+        }
+    }
+
+    @Override
+    public Optional<V> findFirst(final String indexName, final Object key)
+    {
+        synchronized (mutex)
+        {
+            return store.findFirst(indexName, key);
         }
     }
 

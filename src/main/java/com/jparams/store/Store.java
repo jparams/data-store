@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -126,6 +127,45 @@ public interface Store<V> extends Collection<V>
     default <K> Index<V> index(final KeyProvider<K, V> keyProvider) throws IndexException
     {
         return index(UUID.randomUUID().toString(), keyProvider, new DefaultComparisonPolicy<>());
+    }
+
+    /**
+     * Query an index by name and lookup the given key. This method is the equivalent of calling {@link #getIndex(String)}
+     * and then {@link Index#get(Object)}
+     *
+     * @param indexName name of the index to query
+     * @param key       key to lookup
+     * @return values associated with this key or an empty list
+     */
+    default List<V> get(final String indexName, final Object key)
+    {
+        return findIndex(indexName).map(index -> index.get(key)).orElse(Collections.emptyList());
+    }
+
+    /**
+     * Query an index by name and lookup the given key. This method is the equivalent of calling {@link #getIndex(String)}
+     * and then {@link Index#getFirst(Object)}
+     *
+     * @param indexName name of the index to query
+     * @param key       key to lookup
+     * @return first value associated with this key or null
+     */
+    default V getFirst(final String indexName, final Object key)
+    {
+        return findIndex(indexName).map(index -> index.getFirst(key)).orElse(null);
+    }
+
+    /**
+     * Query an index by name and lookup the given key. This method is the equivalent of calling {@link #getIndex(String)}
+     * and then {@link Index#findFirst(Object)}
+     *
+     * @param indexName name of the index to query
+     * @param key       key to lookup
+     * @return first value associated with this key or an empty optional
+     */
+    default Optional<V> findFirst(final String indexName, final Object key)
+    {
+        return findIndex(indexName).flatMap(index -> index.findFirst(key));
     }
 
     /**

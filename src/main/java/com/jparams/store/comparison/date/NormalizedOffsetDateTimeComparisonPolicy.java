@@ -6,7 +6,7 @@ import java.time.ZoneOffset;
 import com.jparams.store.comparison.ComparisonPolicy;
 
 /**
- * Comparison policy for comparing two {@link OffsetDateTime} values normalized to a UTC time offset
+ * Comparison policy for comparing two {@link OffsetDateTime} values normalized to an UTC time offset
  */
 public class NormalizedOffsetDateTimeComparisonPolicy implements ComparisonPolicy<OffsetDateTime>
 {
