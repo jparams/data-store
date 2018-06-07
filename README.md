@@ -26,7 +26,7 @@ Data Store is a full-featured indexed Java Collection capable of ultra-fast data
 
 Here is one I ran earlier...
 
-[image]
+![Benchmark Results](benchmark-results.png)
 
 Fast, huh!
 

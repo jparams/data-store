@@ -38,7 +38,7 @@ public class MemoryStoreBenchmarkTest
 
     @BenchmarkOptions(benchmarkRounds = 500, warmupRounds = 5)
     @Test
-    public void benchmarkIndexedLookup()
+    public void memoryStoreBenchmark()
     {
         final Store<Person> store = new MemoryStore<>(shuffledTestData);
         final Index<Person> index = store.index(Person::getFirstName);
@@ -52,7 +52,7 @@ public class MemoryStoreBenchmarkTest
 
     @BenchmarkOptions(benchmarkRounds = 500, warmupRounds = 5)
     @Test
-    public void benchmarkLoopedLookup()
+    public void arrayListBenchmark()
     {
         for (final Person person : TEST_DATA)
         {
