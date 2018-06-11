@@ -7,9 +7,10 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import com.jparams.store.comparison.ComparisonPolicy;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
+import com.jparams.store.index.KeyMapper;
 import com.jparams.store.index.SynchronizedIndex;
 
 /**
@@ -26,78 +27,6 @@ public class SynchronizedStore<V> implements Store<V>
     {
         this.store = store;
         this.mutex = this;
-    }
-
-    @Override
-    public <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.multiIndex(indexName, keyProvider, comparisonPolicy), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.multiIndex(indexName, keyProvider), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.multiIndex(keyProvider, comparisonPolicy), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.multiIndex(keyProvider), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.index(indexName, keyProvider, comparisonPolicy), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.index(indexName, keyProvider), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<V> index(final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.index(keyProvider, comparisonPolicy), mutex);
-        }
-    }
-
-    @Override
-    public <K> Index<V> index(final KeyProvider<K, V> keyProvider) throws IndexException
-    {
-        synchronized (mutex)
-        {
-            return new SynchronizedIndex<>(store.index(keyProvider), mutex);
-        }
     }
 
     @Override
@@ -165,6 +94,42 @@ public class SynchronizedStore<V> implements Store<V>
         synchronized (mutex)
         {
             return store.removeIndex(indexName);
+        }
+    }
+
+    @Override
+    public <K> Index<V> index(final String indexName, final IndexDefinition<K, V> indexDefinition) throws IndexException
+    {
+        synchronized (mutex)
+        {
+            return store.index(indexName, indexDefinition);
+        }
+    }
+
+    @Override
+    public <K> Index<V> index(final IndexDefinition<K, V> indexDefinition) throws IndexException
+    {
+        synchronized (mutex)
+        {
+            return store.index(indexDefinition);
+        }
+    }
+
+    @Override
+    public <K> Index<V> index(final String indexName, final KeyMapper<K, V> keyMapper) throws IndexException
+    {
+        synchronized (mutex)
+        {
+            return store.index(indexName, keyMapper);
+        }
+    }
+
+    @Override
+    public <K> Index<V> index(final KeyMapper<K, V> keyMapper) throws IndexException
+    {
+        synchronized (mutex)
+        {
+            return store.index(keyMapper);
         }
     }
 

@@ -1,4 +1,4 @@
-package com.jparams.store.comparison;
+package com.jparams.store.index.comparison;
 
 /**
  * Transforms a given key into a comparable key.
@@ -21,5 +21,5 @@ public interface ComparisonPolicy<T>
      * @param item item
      * @return comparable
      */
-    Object createComparable(T item);
+    T createComparable(T item);
 }

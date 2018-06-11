@@ -3,7 +3,6 @@ package com.jparams.store.index;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,8 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.jparams.store.KeyProvider;
-import com.jparams.store.comparison.ComparisonPolicy;
+import com.jparams.store.index.comparison.ComparisonPolicy;
+import com.jparams.store.index.reducer.Reducer;
 import com.jparams.store.reference.Reference;
 
 /**
@@ -22,78 +21,76 @@ import com.jparams.store.reference.Reference;
  */
 public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
 {
-    private final Map<Object, Set<Reference<V>>> keyToReferenceMap;
-    private final Map<Reference<V>, Set<Object>> referenceToKeysMap;
+    private final Map<K, References<K, V>> keyToReferencesMap;
+    private final Map<Reference<V>, Set<K>> referenceToKeysMap;
 
-    public ReferenceIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy)
+    private ReferenceIndex(final String indexName, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy, final Map<K, References<K, V>> keyToReferencesMap, final Map<Reference<V>, Set<K>> referenceToKeysMap)
     {
-        super(indexName, keyProvider, comparisonPolicy);
-        this.keyToReferenceMap = new HashMap<>();
-        this.referenceToKeysMap = new HashMap<>();
+        super(indexName, keyMapper, reducer, comparisonPolicy);
+        this.keyToReferencesMap = keyToReferencesMap;
+        this.referenceToKeysMap = referenceToKeysMap;
     }
 
-    private ReferenceIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy, final Map<Object, Set<Reference<V>>> keyToReferenceMap, final Map<Reference<V>, Set<Object>> referenceToKeysMap)
+    public ReferenceIndex(final String indexName, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy)
     {
-        super(indexName, keyProvider, comparisonPolicy);
-        this.keyToReferenceMap = keyToReferenceMap;
-        this.referenceToKeysMap = referenceToKeysMap;
+        this(indexName, keyMapper, reducer, comparisonPolicy, new HashMap<>(), new HashMap<>());
     }
 
     @Override
     public Optional<V> findFirst(final Object key)
     {
-        final Object comparableKey = getComparableKey(key);
-        final Set<Reference<V>> references = keyToReferenceMap.get(comparableKey);
+        final K comparableKey = getComparableKey(key);
+        final References<K, V> references = keyToReferencesMap.get(comparableKey);
 
         if (references == null)
         {
             return Optional.empty();
         }
 
-        return references.stream().map(Reference::get).findFirst();
+        return references.findFirst();
     }
 
     @Override
     public List<V> get(final Object key)
     {
-        final Object comparableKey = getComparableKey(key);
-        final Set<Reference<V>> references = keyToReferenceMap.get(comparableKey);
+        final K comparableKey = getComparableKey(key);
+        final References<K, V> references = keyToReferencesMap.get(comparableKey);
 
         if (references == null)
         {
             return Collections.emptyList();
         }
 
-        return references.stream().map(Reference::get).collect(Collectors.toList());
+        return references.getAll();
     }
 
     @Override
     public void index(final Reference<V> reference) throws IndexCreationException
     {
-        final Set<Object> keys = generateKeys(reference);
+        final Set<K> keys = generateKeys(reference);
 
         removeIndex(reference);
 
         if (!keys.isEmpty())
         {
             referenceToKeysMap.put(reference, Collections.unmodifiableSet(keys));
-            keys.forEach(key -> keyToReferenceMap.computeIfAbsent(key, ignore -> new LinkedHashSet<>()).add(reference));
+            keys.forEach(key -> keyToReferencesMap.computeIfAbsent(key, ignore -> new References<>(key, reference, getReducer())).add(reference));
         }
     }
 
     @Override
     public void removeIndex(final Reference<V> reference)
     {
-        final Set<Object> keys = referenceToKeysMap.get(reference);
+        final Set<K> keys = referenceToKeysMap.get(reference);
 
         if (keys == null)
         {
             return;
         }
 
-        for (final Object key : keys)
+        for (final K key : keys)
         {
-            final Set<Reference<V>> references = keyToReferenceMap.get(key);
+            final References<K, V> references = keyToReferencesMap.get(key);
 
             if (reference != null)
             {
@@ -101,7 +98,7 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
 
                 if (references.isEmpty())
                 {
-                    keyToReferenceMap.remove(key);
+                    keyToReferencesMap.remove(key);
                 }
             }
         }
@@ -110,21 +107,21 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
     }
 
     @Override
-    protected AbstractIndex<K, V> copy(final String name, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy)
+    protected AbstractIndex<K, V> copy(final String name, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy)
     {
-        final Map<Object, Set<Reference<V>>> keyToReferenceMapCopy = keyToReferenceMap.entrySet()
-                                                                                      .stream()
-                                                                                      .collect(Collectors.toMap(Entry::getKey, references -> new LinkedHashSet<>(references.getValue())));
+        final Map<K, References<K, V>> keyToReferencesMapCopy = keyToReferencesMap.entrySet()
+                                                                                  .stream()
+                                                                                  .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().copy()));
 
-        final Map<Reference<V>, Set<Object>> referenceToKeysMapCopy = new HashMap<>(referenceToKeysMap);
+        final Map<Reference<V>, Set<K>> referenceToKeysMapCopy = new HashMap<>(referenceToKeysMap);
 
-        return new ReferenceIndex<>(name, keyProvider, comparisonPolicy, keyToReferenceMapCopy, referenceToKeysMapCopy);
+        return new ReferenceIndex<>(name, keyMapper, reducer, comparisonPolicy, keyToReferencesMapCopy, referenceToKeysMapCopy);
     }
 
     @Override
     public void clear()
     {
-        keyToReferenceMap.clear();
+        keyToReferencesMap.clear();
         referenceToKeysMap.clear();
     }
 }

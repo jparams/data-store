@@ -1,16 +1,12 @@
 package com.jparams.store.memory;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.jparams.store.AbstractStore;
-import com.jparams.store.KeyProvider;
 import com.jparams.store.Store;
-import com.jparams.store.comparison.ComparisonPolicy;
 import com.jparams.store.identity.DefaultIdentityProvider;
-import com.jparams.store.index.AbstractIndex;
-import com.jparams.store.index.ReferenceIndex;
+import com.jparams.store.index.IndexManager;
+import com.jparams.store.index.ReferenceIndexManager;
 import com.jparams.store.reference.DefaultReferenceManager;
 import com.jparams.store.reference.ReferenceManager;
 
@@ -21,9 +17,14 @@ import com.jparams.store.reference.ReferenceManager;
  */
 public class MemoryStore<V> extends AbstractStore<V>
 {
+    private MemoryStore(final ReferenceManager<V> referenceManager, final IndexManager<V> indexManager)
+    {
+        super(referenceManager, indexManager);
+    }
+
     public MemoryStore()
     {
-        super(new DefaultReferenceManager<>(new DefaultIdentityProvider(), new MemoryReferenceFactory<>()));
+        this(new DefaultReferenceManager<>(new DefaultIdentityProvider(), new MemoryReferenceFactory<>()), new ReferenceIndexManager<>());
     }
 
     public MemoryStore(final Collection<V> items)
@@ -39,28 +40,20 @@ public class MemoryStore<V> extends AbstractStore<V>
         addAll(items);
     }
 
-    private MemoryStore(final ReferenceManager<V> referenceManager, final Set<AbstractIndex<?, V>> indexes)
-    {
-        super(referenceManager, indexes);
-    }
-
     @Override
-    protected Store<V> createCopy(final ReferenceManager<V> referenceManager, final Collection<AbstractIndex<?, V>> indexes)
+    protected Store<V> createCopy(final ReferenceManager<V> referenceManager, final IndexManager<V> indexManager)
     {
-        final ReferenceManager<V> copyOfReferenceManager = referenceManager.copy();
-        final Set<AbstractIndex<?, V>> copyOfIndexes = indexes.stream().map(AbstractIndex::copy).collect(Collectors.toSet());
-        return new MemoryStore<>(copyOfReferenceManager, copyOfIndexes);
-    }
-
-    @Override
-    protected <K> AbstractIndex<K, V> createIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy)
-    {
-        return new ReferenceIndex<>(indexName, keyProvider, comparisonPolicy);
+        return new MemoryStore<>(referenceManager.copy(), indexManager.copy());
     }
 
     @Override
     public String toString()
     {
         return getReferenceManager().getReferences().toString();
+    }
+
+    public static <V> MemoryStoreBuilder<V> newStore()
+    {
+        return new MemoryStoreBuilder<>();
     }
 }

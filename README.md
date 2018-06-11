@@ -91,27 +91,12 @@ Comparison policy for comparing two OffsetDateTime values normalized to an UTC t
 Store<Person> store = new MemoryStore<>();
 
 // Add a case insensitive index
-Index<Person> index = store.addIndex(Person::getLastActive, new NormalizedOffsetDateTimeComparisonPolicy());
+Index<Person> index = store.addIndex(Person::getLastActive, new OffsetDateTimeComparisonPolicy());
 
 // Query index - these will produce the same result
 index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 13, 55, 30), ZoneOffset.ofHours(2)));
 index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 14, 55, 30), ZoneOffset.ofHours(3)));
 index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 15, 55, 30), ZoneOffset.ofHours(4)));
-```
-
-##### Normalized Zoned Date Time Comparison Policy
-Comparison policy for comparing two ZonedDateTime values normalized to an UTC timezone.
-
-```java
-// Create a store
-Store<Person> store = new MemoryStore<>();
-
-// Add a case insensitive index
-Index<Person> index = store.addIndex(Person::getLastActive, new NormalizedZonedDateTimeComparisonPolicy());
-
-// Query index - these will produce the same result
-index.get(LocalDateTime.of(2018, 5, 5, 13, 55, 30).atZone(ZoneId.of("Europe/London")));
-index.get(LocalDateTime.of(2018, 5, 5, 12, 55, 30).atZone(ZoneId.of("UTC")));
 ```
 
 ## Compatibility

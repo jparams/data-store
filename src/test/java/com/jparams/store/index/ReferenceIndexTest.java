@@ -4,8 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.jparams.store.KeyProvider;
-import com.jparams.store.comparison.string.CaseInsensitiveComparisonPolicy;
+import com.jparams.store.index.comparison.string.CaseInsensitiveComparisonPolicy;
 import com.jparams.store.memory.MemoryReference;
 import com.jparams.store.reference.Reference;
 
@@ -28,7 +27,7 @@ public class ReferenceIndexTest
     {
         prefix = new AtomicReference<>("");
 
-        final KeyProvider<Collection<String>, String> transformer = (obj) -> {
+        final KeyMapper<Collection<String>, String> transformer = (obj) -> {
             if ("error".equals(prefix.get() + obj))
             {
                 throw new RuntimeException("error");
@@ -38,7 +37,7 @@ public class ReferenceIndexTest
         };
 
         indexName = "index";
-        subject = new ReferenceIndex<>(indexName, transformer, new CaseInsensitiveComparisonPolicy());
+        subject = new ReferenceIndex<>(indexName, transformer, null, new CaseInsensitiveComparisonPolicy());
 
         value = "JParams";
         reference = new MemoryReference<>(value);
@@ -152,6 +151,6 @@ public class ReferenceIndexTest
     @Test
     public void testFullCopy()
     {
-        assertThat(subject.copy()).isEqualToComparingFieldByField(subject);
+        assertThat(subject.copy()).isEqualToComparingFieldByFieldRecursively(subject);
     }
 }

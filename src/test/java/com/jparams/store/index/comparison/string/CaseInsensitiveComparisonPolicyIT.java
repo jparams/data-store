@@ -1,7 +1,8 @@
-package com.jparams.store.comparison.string;
+package com.jparams.store.index.comparison.string;
 
 import com.jparams.store.Store;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.memory.MemoryStore;
 import com.jparams.store.model.Person;
 import com.jparams.store.model.PersonBuilder;
@@ -20,7 +21,7 @@ public class CaseInsensitiveComparisonPolicyIT
     public void setUp()
     {
         subject = new MemoryStore<>();
-        index = subject.index(Person::getFirstName, new CaseInsensitiveComparisonPolicy());
+        index = subject.index(IndexDefinition.withKeyMapping(Person::getFirstName).withComparisonPolicy(new CaseInsensitiveComparisonPolicy()));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package com.jparams.store.comparison;
+package com.jparams.store.index.comparison;
 
 /**
  * Apply default comparison logic
@@ -14,7 +14,7 @@ public class DefaultComparisonPolicy<V> implements ComparisonPolicy<V>
     }
 
     @Override
-    public Object createComparable(final V item)
+    public V createComparable(final V item)
     {
         return item;
     }
