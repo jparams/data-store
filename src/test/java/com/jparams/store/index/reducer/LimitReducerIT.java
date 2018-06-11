@@ -22,7 +22,7 @@ public class LimitReducerIT
     public void setUp()
     {
         subject = new MemoryStore<>();
-        index = subject.index("", IndexDefinition.withKeyMapping(Person::getFirstName).withReducer(new LimitReducer<>(1, Retain.OLDEST)));
+        index = subject.index("", IndexDefinition.withKeyMapping(Person::getFirstName).withReducer(new LimitReducer<>(2, Retain.OLDEST)));
     }
 
     @Test
@@ -36,6 +36,14 @@ public class LimitReducerIT
         subject.add(person2);
         subject.add(person1);
 
-        assertThat(index.getFirst("Bob")).isSameAs(person3);
+        assertThat(index.get("Bob")).containsExactly(person3, person2);
+
+        subject.remove(person2);
+
+        assertThat(index.get("Bob")).containsExactly(person3, person1);
+
+        subject.add(person2);
+
+        assertThat(index.get("Bob")).containsExactly(person3, person1);
     }
 }

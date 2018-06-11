@@ -30,11 +30,22 @@ public class MinReducerIT
         final Person person1 = PersonBuilder.aPerson().withId(1L).withFirstName("James").build();
         final Person person2 = PersonBuilder.aPerson().withId(2L).withFirstName("James").build();
         final Person person3 = PersonBuilder.aPerson().withId(3L).withFirstName("James").build();
+        final Person person4 = PersonBuilder.aPerson().withId(4L).withFirstName("James").build();
 
         subject.add(person2);
         subject.add(person3);
         subject.add(person1);
 
+        assertThat(index.getFirst("James")).isSameAs(person1);
+
+        subject.remove(person1);
+
+        assertThat(index.getFirst("James")).isSameAs(person2);
+
+        subject.add(person4);
+        assertThat(index.getFirst("James")).isSameAs(person2);
+
+        subject.add(person1);
         assertThat(index.getFirst("James")).isSameAs(person1);
     }
 }
