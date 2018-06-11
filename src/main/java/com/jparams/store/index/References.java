@@ -43,7 +43,11 @@ public class References<K, V>
     public void remove(final Reference<V> reference)
     {
         references.remove(reference);
-        reducedReferences = reduce(references); // on remove, re-reduce all references associated with this key
+
+        if (reducedReferences.contains(reference))
+        {
+            reducedReferences = reduce(references); // on remove, re-reduce all references associated with this key
+        }
     }
 
     public List<V> getAll()
