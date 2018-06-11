@@ -54,7 +54,7 @@ public final class IndexDefinition<K, V>
 
     /**
      * Specify a function that maps a given value to a single indexed key. For example, we can index a Person object by
-     * its firstName field. Example: IndexDefinition.withKeyMapping(Person::getFirstName) <br/><br/>
+     * its firstName field. Example: IndexDefinition.withKeyMapping(Person::getFirstName) <br><br>
      *
      * To map a value to multiple keys, see {@link IndexDefinition#withKeyMappings(KeyMapper)}
      *
@@ -73,7 +73,7 @@ public final class IndexDefinition<K, V>
 
     /**
      * Specify a function that maps a given value to a one or more indexed keys. For example, we can index a Person object by
-     * both its firstName and lastName fields. Example: IndexDefinition.withKeyMapping(person -> Arrays.asList(person.getFirstName(), person.getLastName()))
+     * both its firstName and lastName fields. Example: IndexDefinition.withKeyMapping(person -&gt; Arrays.asList(person.getFirstName(), person.getLastName()))
      *
      * @param mapper a function that maps a given value to one or more indexed keys. Note: any null values returned in the collection will be ignored
      * @param <K>    key type

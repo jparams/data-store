@@ -3,6 +3,7 @@ package com.jparams.store.index.reducer;
 import com.jparams.store.Store;
 import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
+import com.jparams.store.index.reducer.LimitReducer.Retain;
 import com.jparams.store.memory.MemoryStore;
 import com.jparams.store.model.Person;
 import com.jparams.store.model.PersonBuilder;
@@ -12,10 +13,7 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for {@link FirstReducer}
- */
-public class FirstReducerIT
+public class LimitReducerIT
 {
     private Store<Person> subject;
     private Index<Person> index;
@@ -24,7 +22,7 @@ public class FirstReducerIT
     public void setUp()
     {
         subject = new MemoryStore<>();
-        index = subject.index("", IndexDefinition.withKeyMapping(Person::getFirstName).withReducer(new FirstReducer<>()));
+        index = subject.index("", IndexDefinition.withKeyMapping(Person::getFirstName).withReducer(new LimitReducer<>(1, Retain.OLDEST)));
     }
 
     @Test

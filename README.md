@@ -12,13 +12,13 @@ Maven:
 <dependency>
     <groupId>com.jparams</groupId>
     <artifactId>data-store</artifactId>
-    <version>2.x.x</version>
+    <version>3.x.x</version>
 </dependency>
 ```
 
 Gradle:
 ```
-compile 'com.jparams:data-store:2.x.x'
+compile 'com.jparams:data-store:3.x.x'
 ```
 
 ### What is Data Store?
@@ -49,10 +49,10 @@ In case you were wondering, MemoryStore is the default implementation of the Sto
 Lets go ahead and use our Store. Here is some of the cool stuff you can do!
 
 #### Indexing
-Index your Store and enable ultra-fast data lookup. It is as simple as calling the `addIndex` method. Here goes.....
+Index your Store and enable ultra-fast data lookup. It is as simple as calling the `index` method. Here goes.....
 
 ```java
-store.addIndex("firstName", Person::getFirstName);
+store.index("firstName", Person::getFirstName);
 ```
 
 Easy, right?! With our index created, lets query some data and lets query them fast!
@@ -63,8 +63,43 @@ List<Person> result1 = store.get("firstName", "James");
 
 Data Store is backed by hash maps, so this lookup is quick. No looping required.
 
+If you are still not sold on this awesome framework and want more indexing goodness, read on to learn about Reducers and Comparison Policies.
+
+#### Reducer
+A reducer provides a mechanism for reducing all values that map to the same key. 
+
+#### Limit
+You can use a limiting reducer to limit the number of values associated with a single index. Say, we only want to index the first 2 people with the first name James, well we can do this using a reducer.
+
+Example:
+```java
+Index<Person> index = store.index(IndexDefinition.withKeyMapping(Person::getFirstName).withReducer(new MinReducer(2, Retain.OLDEST)));
+```
+
+This means that `index.get("James")` will only ever produce a max of two results. All other people will the first name James will not be indexed.
+
+#### Min
+Say, we want to group by first name then reduce the group down by the date of birth, well we can do this using a Min reducer. This means that we can easily find the youngest person with the given first name.
+
+Example:
+```java
+Index<Person> index = store.index(IndexDefinition.withKeyMapping(Person::getFirstName).withReducer(new MinReducer(Person::getDateOfBirth, false)));
+```
+
+This means that `index.get("James")` will only ever produce a max of two results. All other people will the first name James will not be indexed.
+
+#### Max
+Say, we want to group by first name then reduce the group down by the date of birth, well we can do this using a Max reducer. This means that we can easily find the oldest person with the given first name.
+
+Example:
+```java
+Index<Person> index = store.index(IndexDefinition.withKeyMapping(Person::getFirstName).withReducer(new MaxReducer(Person::getDateOfBirth, false)));
+```
+
 #### Comparison Policy
 Lets build on top of the already powerful indexing feature by introducing Comparison Policies. These policies define how indexes are created and how they are matched.
+
+Here are some available out of the box, but feel free to write your own!
 
 ##### Case Insensitive Comparison Policy
 Use this policy for creating case insensitive indexes. Example:
@@ -74,7 +109,7 @@ Use this policy for creating case insensitive indexes. Example:
 Store<Person> store = new MemoryStore<>();
 
 // Add a case insensitive index
-Index<Person> index = store.addIndex(Person::getFirstName, new CaseInsensitiveComparisonPolicy());
+Index<Person> index = store.index(IndexDefinition.withKeyMapping(Person::getLastName).withComparisonPolicy(new CaseInsensitiveComparisonPolicy()));
 
 // Query index - these will produce the same result
 index.get("James");
@@ -83,7 +118,7 @@ index.get("james");
 index.get("JAMes");
 ```
 
-##### Normalized Offset Date Time Comparison Policy
+##### Offset Date Time Comparison Policy
 Comparison policy for comparing two OffsetDateTime values normalized to an UTC time offset.
 
 ```java
@@ -97,6 +132,19 @@ Index<Person> index = store.addIndex(Person::getLastActive, new OffsetDateTimeCo
 index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 13, 55, 30), ZoneOffset.ofHours(2)));
 index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 14, 55, 30), ZoneOffset.ofHours(3)));
 index.get(OffsetDateTime.of(LocalDateTime.of(2018, 5, 5, 15, 55, 30), ZoneOffset.ofHours(4)));
+```
+
+### Builder
+For that extra continence, data store comes with a builder. If you want to do more with a single line of code, we have you covered.
+
+Example:
+
+```java
+Store<Person> store = MemoryStore.<Person>newStore()
+    .withIndex("firstName", Person::getFirstName)
+    .withIndex("lastName", IndexDefinition.withKeyMapping(Person::getLastName).withComparisonPolicy(new CaseInsensitiveComparisonPolicy()))
+    .withValues(person1, person32)
+    .build();
 ```
 
 ## Compatibility

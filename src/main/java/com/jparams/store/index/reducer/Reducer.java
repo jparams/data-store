@@ -1,6 +1,6 @@
 package com.jparams.store.index.reducer;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.jparams.store.index.Element;
 
@@ -18,7 +18,6 @@ public interface Reducer<K, V>
      *
      * @param key      key for values
      * @param elements elements to reduce
-     * @return key
      */
-    void reduce(K key, Collection<Element<V>> elements);
+    void reduce(K key, List<Element<V>> elements);
 }

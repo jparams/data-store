@@ -12,9 +12,6 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for {@link MaxReducer}
- */
 public class MaxReducerIT
 {
     private Store<Person> subject;

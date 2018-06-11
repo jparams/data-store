@@ -12,9 +12,6 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for {@link MinReducer}
- */
 public class MinReducerIT
 {
     private Store<Person> subject;

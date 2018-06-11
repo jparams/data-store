@@ -1,6 +1,6 @@
 package com.jparams.store.index.reducer;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 import com.jparams.store.index.Element;
@@ -23,7 +23,7 @@ public class MinReducer<K, V, C extends Comparable<C>> implements Reducer<K, V>
     }
 
     @Override
-    public void reduce(final K key, final Collection<Element<V>> elements)
+    public void reduce(final K key, final List<Element<V>> elements)
     {
         elements.stream().reduce(this::reduce);
     }
