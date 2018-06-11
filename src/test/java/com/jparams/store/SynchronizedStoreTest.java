@@ -1,7 +1,6 @@
 package com.jparams.store;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -9,8 +8,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.jparams.store.comparison.DefaultComparisonPolicy;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexDefinition;
+import com.jparams.store.index.KeyMapper;
 import com.jparams.store.index.SynchronizedIndex;
 
 import org.junit.Before;
@@ -73,35 +73,26 @@ public class SynchronizedStoreTest
     }
 
     @Test
-    public void testIndexWithNameAndProviderAndComparisonPolicy()
-    {
-        final DefaultComparisonPolicy<String> comparisonPolicy = new DefaultComparisonPolicy<>();
-        final KeyProvider<String, String> keyProvider = (val) -> "";
-        subject.index("name", keyProvider, comparisonPolicy);
-        verify(mockStore).index(eq("name"), same(keyProvider), same(comparisonPolicy));
-    }
-
-    @Test
-    public void testIndexWithProviderAndComparisonPolicy()
-    {
-        final DefaultComparisonPolicy<String> comparisonPolicy = new DefaultComparisonPolicy<>();
-        final KeyProvider<String, String> keyProvider = (val) -> "";
-        subject.index(keyProvider, comparisonPolicy);
-        verify(mockStore).index(same(keyProvider), same(comparisonPolicy));
-    }
-
-    @Test
     public void testIndexWithNameAndProvider()
     {
-        final KeyProvider<String, String> keyProvider = (val) -> "";
+        final KeyMapper<String, String> keyProvider = (val) -> "";
         subject.index("name", keyProvider);
         verify(mockStore).index(eq("name"), same(keyProvider));
     }
 
     @Test
+    public void testIndexWithNameAndDefinition()
+    {
+        final KeyMapper<String, String> keyProvider = (val) -> "";
+        final IndexDefinition<String, String> indexDefinition = IndexDefinition.withKeyMapping(keyProvider);
+        subject.index("name", indexDefinition);
+        verify(mockStore).index(eq("name"), same(indexDefinition));
+    }
+
+    @Test
     public void testIndexWithProvider()
     {
-        final KeyProvider<String, String> keyProvider = (val) -> "";
+        final KeyMapper<String, String> keyProvider = (val) -> "";
 
         subject.index(keyProvider);
 
@@ -109,39 +100,13 @@ public class SynchronizedStoreTest
     }
 
     @Test
-    public void testMultiIndexWithNameAndProviderAndComparisonPolicy()
+    public void testIndexWithDefinition()
     {
-        final DefaultComparisonPolicy<String> comparisonPolicy = new DefaultComparisonPolicy<>();
-        final KeyProvider<Collection<String>, String> keyProvider = (val) -> Collections.singletonList("");
-        subject.multiIndex("name", keyProvider, comparisonPolicy);
-        verify(mockStore).multiIndex(eq("name"), same(keyProvider), same(comparisonPolicy));
-    }
+        final IndexDefinition<?, String> indexDefinition = IndexDefinition.withKeyMapping(null);
 
-    @Test
-    public void testMultiIndexWithProviderAndComparisonPolicy()
-    {
-        final DefaultComparisonPolicy<String> comparisonPolicy = new DefaultComparisonPolicy<>();
-        final KeyProvider<Collection<String>, String> keyProvider = (val) -> Collections.singletonList("");
-        subject.multiIndex(keyProvider, comparisonPolicy);
-        verify(mockStore).multiIndex(same(keyProvider), same(comparisonPolicy));
-    }
+        subject.index(indexDefinition);
 
-    @Test
-    public void testMultiIndexWithNameAndProvider()
-    {
-        final KeyProvider<Collection<String>, String> keyProvider = (val) -> Collections.singletonList("");
-        subject.multiIndex("name", keyProvider);
-        verify(mockStore).multiIndex(eq("name"), same(keyProvider));
-    }
-
-    @Test
-    public void testMultiIndexWithProvider()
-    {
-        final KeyProvider<Collection<String>, String> keyProvider = (val) -> Collections.singletonList("");
-
-        subject.multiIndex(keyProvider);
-
-        verify(mockStore).multiIndex(same(keyProvider));
+        verify(mockStore).index(same(indexDefinition));
     }
 
     @Test

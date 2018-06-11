@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
-import com.jparams.store.comparison.DefaultComparisonPolicy;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexDefinition;
+import com.jparams.store.index.KeyMapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,51 +65,27 @@ public class UnmodifiableStoreTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIndexWithProviderAndComparisonPolicy()
+    public void testIndexWithMapper()
     {
-        subject.index(null, new DefaultComparisonPolicy<>());
+        subject.index((KeyMapper<?, String>) null);
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIndexWithNameAndProviderAndComparisonPolicy()
+    public void testIndexWithNameAndMapper()
     {
-        subject.index(null, null, null);
+        subject.index("", (KeyMapper<?, String>) null);
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIndexWithNameAndProvider()
+    public void testIndexWithNameAndDefinition()
     {
-        subject.index("", null);
+        subject.index("", IndexDefinition.withKeyMapping(str -> str));
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void testIndexWithProvider()
+    public void testIndex()
     {
-        subject.index(null);
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testMultiIndexWithProviderAndComparisonPolicy()
-    {
-        subject.multiIndex(null, new DefaultComparisonPolicy<>());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testMultiIndexWithNameAndProviderAndComparisonPolicy()
-    {
-        subject.multiIndex(null, null, null);
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testMultiIndexWithNameAndProvider()
-    {
-        subject.multiIndex("", null);
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void testMultiIndexWithProvider()
-    {
-        subject.multiIndex(null);
+        subject.index(IndexDefinition.withKeyMapping(null));
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -249,6 +226,12 @@ public class UnmodifiableStoreTest
     public void testRemove()
     {
         subject.remove("");
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testRemoveIf()
+    {
+        subject.removeIf(String::isEmpty);
     }
 
     @Test

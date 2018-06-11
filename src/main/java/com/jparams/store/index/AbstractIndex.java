@@ -5,24 +5,27 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.jparams.store.KeyProvider;
-import com.jparams.store.comparison.ComparisonPolicy;
+import com.jparams.store.index.comparison.ComparisonPolicy;
+import com.jparams.store.index.reducer.Reducer;
 import com.jparams.store.reference.Reference;
 
 public abstract class AbstractIndex<K, V> implements Index<V>
 {
     private final String name;
-    private final KeyProvider<Collection<K>, V> keyProvider;
+    private final KeyMapper<Collection<K>, V> keyMapper;
+    private final Reducer<K, V> reducer;
     private final ComparisonPolicy<K> comparisonPolicy;
 
-    protected AbstractIndex(final String name, final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy)
+    protected AbstractIndex(final String name, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy)
     {
+
         this.name = name;
-        this.keyProvider = keyProvider;
+        this.keyMapper = keyMapper;
+        this.reducer = reducer;
         this.comparisonPolicy = comparisonPolicy;
     }
 
-    protected Set<Object> generateKeys(final Reference<V> reference) throws IndexCreationException
+    protected Set<K> generateKeys(final Reference<V> reference) throws IndexCreationException
     {
         final V item;
 
@@ -37,11 +40,11 @@ public abstract class AbstractIndex<K, V> implements Index<V>
 
         try
         {
-            return keyProvider.provide(item)
-                              .stream()
-                              .map(this::getComparableKey)
-                              .filter(Objects::nonNull)
-                              .collect(Collectors.toSet());
+            return keyMapper.map(item)
+                            .stream()
+                            .map(this::getComparableKey)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
         }
         catch (final RuntimeException e)
         {
@@ -49,15 +52,20 @@ public abstract class AbstractIndex<K, V> implements Index<V>
         }
     }
 
-    protected Object getComparableKey(final Object key)
+    protected K getComparableKey(final Object key)
     {
         if (key == null || !comparisonPolicy.supports(key.getClass()))
         {
             return null;
         }
 
-        @SuppressWarnings("unchecked") final Object comparableKey = comparisonPolicy.createComparable((K) key);
-        return comparableKey;
+        @SuppressWarnings("unchecked") final K comparable = comparisonPolicy.createComparable((K) key);
+        return comparable;
+    }
+
+    protected Reducer<K, V> getReducer()
+    {
+        return reducer;
     }
 
     public abstract void index(final Reference<V> reference) throws IndexCreationException;
@@ -66,11 +74,11 @@ public abstract class AbstractIndex<K, V> implements Index<V>
 
     public abstract void clear();
 
-    protected abstract AbstractIndex<K, V> copy(String name, KeyProvider<Collection<K>, V> keyProvider, ComparisonPolicy<K> comparisonPolicy);
+    protected abstract AbstractIndex<K, V> copy(String name, KeyMapper<Collection<K>, V> keyMapper, Reducer<K, V> reducer, ComparisonPolicy<K> comparisonPolicy);
 
     public AbstractIndex<K, V> copy()
     {
-        return copy(name, keyProvider, comparisonPolicy);
+        return copy(name, keyMapper, reducer, comparisonPolicy);
     }
 
     @Override

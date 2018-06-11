@@ -1,13 +1,13 @@
-package com.jparams.store;
+package com.jparams.store.index;
 
 /**
- * Transform a given value into a key
+ * Map a value to a single indexed key
  *
  * @param <K> key type
  * @param <V> value type
  */
 @FunctionalInterface
-public interface KeyProvider<K, V>
+public interface KeyMapper<K, V>
 {
     /**
      * Index value to key or return null
@@ -15,5 +15,5 @@ public interface KeyProvider<K, V>
      * @param value value to transform into a key
      * @return key
      */
-    K provide(V value);
+    K map(V value);
 }

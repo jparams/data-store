@@ -5,11 +5,13 @@ import java.util.Iterator;
 
 import com.jparams.store.Store;
 import com.jparams.store.SynchronizedStore;
-import com.jparams.store.comparison.string.CaseInsensitiveComparisonPolicy;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
+import com.jparams.store.index.KeyMapper;
 import com.jparams.store.index.ReferenceIndex;
 import com.jparams.store.index.SynchronizedIndex;
+import com.jparams.store.index.comparison.string.CaseInsensitiveComparisonPolicy;
 import com.jparams.store.model.Person;
 
 import org.junit.Before;
@@ -32,14 +34,17 @@ public class MemoryStoreTest
     {
         subject = new MemoryStore<>();
 
-        firstNameIndex = subject.index("firstName", (person) -> {
+        final KeyMapper<String, Person> keyMapper = (person) ->
+        {
             if (throwException)
             {
                 throw new RuntimeException("error indexing " + person.getFirstName());
             }
 
             return person.getFirstName();
-        }, new CaseInsensitiveComparisonPolicy());
+        };
+
+        firstNameIndex = subject.index("firstName", IndexDefinition.withKeyMapping(keyMapper).withComparisonPolicy(new CaseInsensitiveComparisonPolicy()));
 
         person1 = createPerson("John", "Smith");
         subject.add(person1);
@@ -61,7 +66,7 @@ public class MemoryStoreTest
     @Test
     public void testAddMultiIndexWithProvider()
     {
-        final Index<Person> anyNameIndex = subject.multiIndex(person -> Arrays.asList(person.getFirstName(), person.getLastName()));
+        final Index<Person> anyNameIndex = subject.index(IndexDefinition.withKeyMappings(person -> Arrays.asList(person.getFirstName(), person.getLastName())));
         assertThat(anyNameIndex.getFirst("John")).isSameAs(person1);
         assertThat(anyNameIndex.getFirst("Smith")).isSameAs(person1);
         assertThat(anyNameIndex.get("James")).containsExactly(person2, person3);
@@ -92,7 +97,8 @@ public class MemoryStoreTest
     @Test
     public void testAddIndexWithNameAndProviderAndPolicy()
     {
-        subject.index("lastName", Person::getLastName, new CaseInsensitiveComparisonPolicy());
+        subject.index("lastName", IndexDefinition.withKeyMapping(Person::getLastName)
+                                                 .withComparisonPolicy(new CaseInsensitiveComparisonPolicy()));
 
         final Index<Person> lastNameIndex = subject.getIndex("lastName");
         assertThat(lastNameIndex.getFirst("smith")).isSameAs(person1);
@@ -142,7 +148,7 @@ public class MemoryStoreTest
     @Test
     public void testRemoveIndexHandlesInvalidIndex()
     {
-        assertThat(subject.removeIndex(new ReferenceIndex<>(firstNameIndex.getName(), null, null)));
+        assertThat(subject.removeIndex(new ReferenceIndex<>(firstNameIndex.getName(), null, null, null)));
         assertThat(subject.getIndexes()).isNotEmpty();
     }
 

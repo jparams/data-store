@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.jparams.store.comparison.ComparisonPolicy;
-import com.jparams.store.comparison.DefaultComparisonPolicy;
 import com.jparams.store.index.Index;
+import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
+import com.jparams.store.index.KeyMapper;
 
 /**
  * Store of data
@@ -21,112 +21,56 @@ import com.jparams.store.index.IndexException;
 public interface Store<V> extends Collection<V>
 {
     /**
-     * Register a new index with this store, mapping a single value to a collection of indexed keys
+     * Create an index using the index definition provided
      *
-     * @param indexName        unique index name for this store
-     * @param keyProvider      function to provide a value to one or more keys to index on
-     * @param comparisonPolicy comparison strategy
-     * @param <K>              key type
+     * @param indexName       name of the index
+     * @param indexDefinition definition of the index
+     * @param <K>             indexed key type
      * @return index
-     * @throws IndexException thrown if the new index failed with exceptions.
+     * @throws IndexException thrown if the creation of the new index fails with exceptions.
      */
-    <K> Index<V> multiIndex(String indexName, KeyProvider<Collection<K>, V> keyProvider, ComparisonPolicy<K> comparisonPolicy) throws IndexException;
+    <K> Index<V> index(String indexName, IndexDefinition<K, V> indexDefinition) throws IndexException;
 
     /**
-     * Register a new index with this store, mapping a single value to a collection of indexed keys
+     * Create an index using the index definition provided
      *
-     * @param indexName   unique index name for this store
-     * @param keyProvider function to provide a value to one or more keys
-     * @param <K>         key type
+     * @param indexDefinition definition of the index
+     * @param <K>             indexed key type
      * @return index
-     * @throws IndexException thrown if the new index failed with exceptions.
+     * @throws IndexException thrown if the creation of the new index fails with exceptions.
      */
-    default <K> Index<V> multiIndex(final String indexName, final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
+    default <K> Index<V> index(final IndexDefinition<K, V> indexDefinition) throws IndexException
     {
-        return multiIndex(indexName, keyProvider, new DefaultComparisonPolicy<>());
+        return index(UUID.randomUUID().toString(), indexDefinition);
     }
 
     /**
-     * Register a new index with this store, mapping a single value to a collection of indexed keys
+     * Register a new index with this store, mapping a single value to a collection of indexed keys.
+     * This is a convenient of creating an index, for more options see {@link #index(IndexDefinition)}
      *
-     * @param keyProvider      function to provide a value to one or more keys
-     * @param comparisonPolicy comparison strategy
-     * @param <K>              key type
+     * @param indexName name of the index
+     * @param keyMapper function to provide a value to one or more keys
+     * @param <K>       key type
      * @return index
      * @throws IndexException thrown if the new index failed with exceptions.
      */
-    default <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
+    default <K> Index<V> index(final String indexName, final KeyMapper<K, V> keyMapper) throws IndexException
     {
-        return multiIndex(UUID.randomUUID().toString(), keyProvider, comparisonPolicy);
+        return index(indexName, IndexDefinition.withKeyMapping(keyMapper));
     }
 
     /**
-     * Register a new index with this store, mapping a single value to a collection of indexed keys
+     * Register a new index with this store, mapping a single value to a collection of indexed keys.
+     * This is a convenient of creating an index, for more options see {@link #index(IndexDefinition)}
      *
-     * @param keyProvider function to provide a value to one or more keys
-     * @param <K>         key type
+     * @param keyMapper function to provide a value to one or more keys
+     * @param <K>       key type
      * @return index
      * @throws IndexException thrown if the new index failed with exceptions.
      */
-    default <K> Index<V> multiIndex(final KeyProvider<Collection<K>, V> keyProvider) throws IndexException
+    default <K> Index<V> index(final KeyMapper<K, V> keyMapper) throws IndexException
     {
-        return multiIndex(UUID.randomUUID().toString(), keyProvider, new DefaultComparisonPolicy<>());
-    }
-
-    /**
-     * Register a new index with this store
-     *
-     * @param indexName        unique index name for this store
-     * @param keyProvider      function to provide a value to one or more keys to index on
-     * @param comparisonPolicy comparison strategy
-     * @param <K>              key type
-     * @return index
-     * @throws IndexException thrown if the new index failed with exceptions.
-     */
-    default <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
-    {
-        return multiIndex(indexName, value -> Collections.singletonList(keyProvider.provide(value)), comparisonPolicy);
-    }
-
-    /**
-     * Register a new index with this store
-     *
-     * @param indexName   unique index name for this store
-     * @param keyProvider function to provide a value to one or more keys
-     * @param <K>         key type
-     * @return index
-     * @throws IndexException thrown if the new index failed with exceptions.
-     */
-    default <K> Index<V> index(final String indexName, final KeyProvider<K, V> keyProvider) throws IndexException
-    {
-        return index(indexName, keyProvider, new DefaultComparisonPolicy<>());
-    }
-
-    /**
-     * Register a new index with this store.
-     *
-     * @param keyProvider      function to provide a value to one or more keys
-     * @param comparisonPolicy comparison strategy
-     * @param <K>              key type
-     * @return index
-     * @throws IndexException thrown if the new index failed with exceptions.
-     */
-    default <K> Index<V> index(final KeyProvider<K, V> keyProvider, final ComparisonPolicy<K> comparisonPolicy) throws IndexException
-    {
-        return index(UUID.randomUUID().toString(), keyProvider, comparisonPolicy);
-    }
-
-    /**
-     * Create and register a new index with this store.
-     *
-     * @param keyProvider function to provide a value to one or more keys
-     * @param <K>         key type
-     * @return index
-     * @throws IndexException thrown if the new index failed with exceptions.
-     */
-    default <K> Index<V> index(final KeyProvider<K, V> keyProvider) throws IndexException
-    {
-        return index(UUID.randomUUID().toString(), keyProvider, new DefaultComparisonPolicy<>());
+        return index(IndexDefinition.withKeyMapping(keyMapper));
     }
 
     /**

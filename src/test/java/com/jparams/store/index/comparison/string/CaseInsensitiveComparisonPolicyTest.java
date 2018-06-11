@@ -1,4 +1,4 @@
-package com.jparams.store.comparison.string;
+package com.jparams.store.index.comparison.string;
 
 import org.junit.Before;
 import org.junit.Test;
