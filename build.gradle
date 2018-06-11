@@ -8,6 +8,11 @@ buildscript {
     }
 }
 
+plugins {
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.6.3'
+}
+
 apply plugin: 'java'
 apply plugin: 'nexus'
 apply plugin: 'maven'
@@ -32,4 +37,11 @@ dependencies {
     testCompile 'com.fasterxml.jackson.core:jackson-annotations:2.8.8'
     testCompile 'com.fasterxml.jackson.core:jackson-databind:2.8.8.1'
     testCompile 'nl.jqno.equalsverifier:equalsverifier:2.2.1'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
 }
