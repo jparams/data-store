@@ -1,6 +1,5 @@
 package com.jparams.store.index;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -17,32 +16,34 @@ public class References<K, V>
     private final K key;
     private final Reducer<K, V> reducer;
     private final Set<Reference<V>> references;
-    private Collection<Reference<V>> reducedReferences;
+    private Set<Reference<V>> reducedReferences;
 
     private References(final K key, final Set<Reference<V>> references, final Collection<Reference<V>> reducedReferences, final Reducer<K, V> reducer)
     {
         this.key = key;
         this.references = new LinkedHashSet<>(references);
-        this.reducedReferences = new ArrayList<>(reducedReferences);
+        this.reducedReferences = new LinkedHashSet<>(reducedReferences);
         this.reducer = reducer;
     }
 
     public References(final K key, final Reference<V> reference, final Reducer<K, V> reducer)
     {
         this(key, Collections.singleton(reference), Collections.emptySet(), reducer);
-        reduce();
+        reducedReferences.add(reference);
+        reducedReferences = reduce(reducedReferences);
     }
 
     public void add(final Reference<V> reference)
     {
         references.add(reference);
-        reduce();
+        reducedReferences.add(reference);
+        reducedReferences = reduce(reducedReferences);
     }
 
     public void remove(final Reference<V> reference)
     {
         references.remove(reference);
-        reduce();
+        reducedReferences = reduce(references); // on remove, re-reduce all references associated with this key
     }
 
     public List<V> getAll()
@@ -65,16 +66,19 @@ public class References<K, V>
         return new References<>(key, references, reducedReferences, reducer);
     }
 
-    private void reduce()
+    private Set<Reference<V>> reduce(final Set<Reference<V>> references)
     {
         if (reducer == null)
         {
-            reducedReferences = references;
-            return;
+            return references;
         }
 
         final List<Element<V>> elements = references.stream().map(Element::new).collect(Collectors.toList());
         reducer.reduce(key, elements);
-        reducedReferences = elements.stream().filter(element -> !element.isRemoved()).map(Element::getReference).collect(Collectors.toList());
+
+        return elements.stream()
+                       .filter(element -> !element.isRemoved())
+                       .map(Element::getReference)
+                       .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
