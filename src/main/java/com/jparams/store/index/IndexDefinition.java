@@ -30,7 +30,7 @@ public final class IndexDefinition<K, V>
      * Specify a function that reduces multiple values that map to the same key.
      *
      * @param reducer reduction function
-     * @return index definition
+     * @return index build
      */
     public IndexDefinition<K, V> withReducer(final Reducer<K, V> reducer)
     {
@@ -44,7 +44,7 @@ public final class IndexDefinition<K, V>
      * indexes insensitive of case.
      *
      * @param comparisonPolicy policy to define how indexed keys are compared
-     * @return index definition
+     * @return index build
      */
     public IndexDefinition<K, V> withComparisonPolicy(final ComparisonPolicy<K> comparisonPolicy)
     {
@@ -61,7 +61,7 @@ public final class IndexDefinition<K, V>
      * @param keyMapper a function that maps a given value to a single indexed key. Note: If the mapper returns a null, indexing will be skipped for the given value.
      * @param <K>       key type
      * @param <V>       value type
-     * @return index definition
+     * @return index build
      */
     public static <K, V> IndexDefinition<K, V> withKeyMapping(final KeyMapper<K, V> keyMapper)
     {
@@ -78,7 +78,7 @@ public final class IndexDefinition<K, V>
      * @param mapper a function that maps a given value to one or more indexed keys. Note: any null values returned in the collection will be ignored
      * @param <K>    key type
      * @param <V>    value type
-     * @return index definition
+     * @return index build
      */
     public static <K, V> IndexDefinition<K, V> withKeyMappings(final KeyMapper<Collection<K>, V> mapper)
     {

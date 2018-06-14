@@ -12,6 +12,8 @@ import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.KeyMapper;
 import com.jparams.store.index.SynchronizedIndex;
+import com.jparams.store.query.BasicQuery;
+import com.jparams.store.query.Query;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -48,10 +51,57 @@ public class SynchronizedStoreTest
     }
 
     @Test
+    public void testGetIndexedValuesWithQuery()
+    {
+        final ArrayList<String> list = new ArrayList<>();
+        when(mockStore.get(any(Query.class))).thenReturn(list);
+        final BasicQuery query = Query.where("index", "key");
+        assertThat(subject.get(query)).isSameAs(list);
+        verify(mockStore).get(query);
+    }
+
+    @Test
+    public void testGetIndexedValuesWithQueryAndLimit()
+    {
+        final ArrayList<String> list = new ArrayList<>();
+        when(mockStore.get(any(Query.class), anyInt())).thenReturn(list);
+        final BasicQuery query = Query.where("index", "key");
+        assertThat(subject.get(query, 1)).isSameAs(list);
+        verify(mockStore).get(query, 1);
+    }
+
+    @Test
+    public void testGetFirstValueWithQuery()
+    {
+        when(mockStore.getFirst(any())).thenReturn("abc");
+        final BasicQuery query = Query.where("index", "key");
+        assertThat(subject.getFirst(query)).isEqualTo("abc");
+        verify(mockStore).getFirst(query);
+    }
+
+    @Test
+    public void testFindFirstValueWithQuery()
+    {
+        when(mockStore.findFirst(any())).thenReturn(Optional.of("abc"));
+        final BasicQuery query = Query.where("index", "key");
+        assertThat(subject.findFirst(query)).hasValue("abc");
+        verify(mockStore).findFirst(query);
+    }
+
+    @Test
+    public void testGetIndexedValuesWithLimit()
+    {
+        final ArrayList<String> list = new ArrayList<>();
+        when(mockStore.get(any(), anyString(), anyInt())).thenReturn(list);
+        assertThat(subject.get("index", "key", 1)).isSameAs(list);
+        verify(mockStore).get("index", "key", 1);
+    }
+
+    @Test
     public void testGetIndexedValues()
     {
         final ArrayList<String> list = new ArrayList<>();
-        when(mockStore.get(any(), any())).thenReturn(list);
+        when(mockStore.get(any(), anyString())).thenReturn(list);
         assertThat(subject.get("index", "key")).isSameAs(list);
         verify(mockStore).get("index", "key");
     }

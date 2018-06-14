@@ -13,6 +13,7 @@ import com.jparams.store.index.ReferenceIndex;
 import com.jparams.store.index.SynchronizedIndex;
 import com.jparams.store.index.comparison.string.CaseInsensitiveComparisonPolicy;
 import com.jparams.store.model.Person;
+import com.jparams.store.query.Query;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -168,6 +169,8 @@ public class MemoryStoreTest
     @Test
     public void testGetIndexedData()
     {
+        subject.index("lastName", Person::getLastName);
+
         assertThat(firstNameIndex.getFirst("John")).isSameAs(person1);
         assertThat(subject.getFirst("firstName", "John")).isSameAs(person1);
 
@@ -176,6 +179,11 @@ public class MemoryStoreTest
 
         assertThat(firstNameIndex.get("Random")).isEmpty();
         assertThat(subject.get("firstName", "Random")).isEmpty();
+
+        assertThat(subject.get(Query.where("firstName", "John").or("firstName", "James"))).containsExactly(person1, person2, person3);
+        assertThat(subject.get(Query.where("firstName", "John").or("firstName", "James"), 2)).containsExactly(person1, person2);
+        assertThat(subject.get(Query.where("firstName", "John").and("lastName", "Smith"))).containsExactly(person1);
+        assertThat(subject.get(Query.where("firstName", "John").and("lastName", "Stewart"))).isEmpty();
     }
 
     @Test
@@ -186,6 +194,9 @@ public class MemoryStoreTest
 
         assertThat(firstNameIndex.findFirst("Random")).isEmpty();
         assertThat(subject.findFirst("firstName", "Random")).isEmpty();
+
+        assertThat(subject.findFirst(Query.where("firstName", "John"))).hasValue(person1);
+        assertThat(subject.findFirst(Query.where("firstName", "John").or("firstName", "Random"))).hasValue(person1);
     }
 
     @Test
