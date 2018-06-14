@@ -10,7 +10,7 @@ package com.jparams.store.index;
 public interface KeyMapper<K, V>
 {
     /**
-     * Index value to key or return null
+     * Index value to key or return null to skip indexing
      *
      * @param value value to transform into a key
      * @return key
