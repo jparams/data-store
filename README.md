@@ -61,6 +61,16 @@ Easy, right?! With our index created, lets query some data and lets query them f
 List<Person> result1 = store.get("firstName", "James");
 ```
 
+Let's do something a bit more advanced and work with multiple indexes!
+
+```java
+store.index("firstName", Person::getFirstName);
+store.index("lastName", Person::getLastName);
+
+// Lets do a more advanced query
+Person person = store.getFirst(Query.where("firstName", "james").and("lastName", "smith"));
+```
+
 Data Store is backed by hash maps, so this lookup is quick. No looping required.
 
 If you are still not sold on this awesome framework and want more indexing goodness, read on to learn about Reducers and Comparison Policies.
