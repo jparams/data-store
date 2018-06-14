@@ -11,6 +11,7 @@ import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
 import com.jparams.store.index.KeyMapper;
+import com.jparams.store.query.Query;
 
 /**
  * Implementation of a store that cannot be modified
@@ -51,6 +52,12 @@ public class UnmodifiableStore<V> implements Store<V>
     }
 
     @Override
+    public List<V> get(final String indexName, final Object key, final Integer limit)
+    {
+        return store.get(indexName, key, limit);
+    }
+
+    @Override
     public List<V> get(final String indexName, final Object key)
     {
         return store.get(indexName, key);
@@ -68,6 +75,29 @@ public class UnmodifiableStore<V> implements Store<V>
         return store.findFirst(indexName, key);
     }
 
+    @Override
+    public List<V> get(final Query query, final Integer limit)
+    {
+        return store.get(query, limit);
+    }
+
+    @Override
+    public List<V> get(final Query query)
+    {
+        return store.get(query);
+    }
+
+    @Override
+    public V getFirst(final Query query)
+    {
+        return store.getFirst(query);
+    }
+
+    @Override
+    public Optional<V> findFirst(final Query query)
+    {
+        return store.findFirst(query);
+    }
 
     @Override
     public void removeAllIndexes()

@@ -50,6 +50,11 @@ public class References<K, V>
         }
     }
 
+    public Set<Reference<V>> getAllReferences()
+    {
+        return Collections.unmodifiableSet(reducedReferences);
+    }
+
     public List<V> getAll()
     {
         return reducedReferences.stream().map(Reference::get).collect(Collectors.toList());

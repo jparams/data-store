@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,14 +20,21 @@ import com.jparams.store.reference.Reference;
  *
  * @param <V> value type
  */
-public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
+public class ReferenceIndex<K, V> implements Index<V>
 {
+    private final String name;
+    private final KeyMapper<Collection<K>, V> keyMapper;
+    private final Reducer<K, V> reducer;
+    private final ComparisonPolicy<K> comparisonPolicy;
     private final Map<K, References<K, V>> keyToReferencesMap;
     private final Map<Reference<V>, Set<K>> referenceToKeysMap;
 
-    private ReferenceIndex(final String indexName, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy, final Map<K, References<K, V>> keyToReferencesMap, final Map<Reference<V>, Set<K>> referenceToKeysMap)
+    private ReferenceIndex(final String name, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy, final Map<K, References<K, V>> keyToReferencesMap, final Map<Reference<V>, Set<K>> referenceToKeysMap)
     {
-        super(indexName, keyMapper, reducer, comparisonPolicy);
+        this.name = name;
+        this.keyMapper = keyMapper;
+        this.reducer = reducer;
+        this.comparisonPolicy = comparisonPolicy;
         this.keyToReferencesMap = keyToReferencesMap;
         this.referenceToKeysMap = referenceToKeysMap;
     }
@@ -34,6 +42,12 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
     public ReferenceIndex(final String indexName, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy)
     {
         this(indexName, keyMapper, reducer, comparisonPolicy, new HashMap<>(), new HashMap<>());
+    }
+
+    @Override
+    public String getName()
+    {
+        return name;
     }
 
     @Override
@@ -50,6 +64,19 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
         return references.findFirst();
     }
 
+    public Set<Reference<V>> getReferences(final Object key)
+    {
+        final K comparableKey = getComparableKey(key);
+        final References<K, V> references = keyToReferencesMap.get(comparableKey);
+
+        if (references == null)
+        {
+            return Collections.emptySet();
+        }
+
+        return references.getAllReferences();
+    }
+
     @Override
     public List<V> get(final Object key)
     {
@@ -64,7 +91,6 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
         return references.getAll();
     }
 
-    @Override
     public void index(final Reference<V> reference) throws IndexCreationException
     {
         final Set<K> keys = generateKeys(reference);
@@ -74,11 +100,10 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
         if (!keys.isEmpty())
         {
             referenceToKeysMap.put(reference, Collections.unmodifiableSet(keys));
-            keys.forEach(key -> keyToReferencesMap.computeIfAbsent(key, ignore -> new References<>(key, reference, getReducer())).add(reference));
+            keys.forEach(key -> keyToReferencesMap.computeIfAbsent(key, ignore -> new References<>(key, reference, reducer)).add(reference));
         }
     }
 
-    @Override
     public void removeIndex(final Reference<V> reference)
     {
         final Set<K> keys = referenceToKeysMap.get(reference);
@@ -106,8 +131,13 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
         referenceToKeysMap.remove(reference);
     }
 
-    @Override
-    protected AbstractIndex<K, V> copy(final String name, final KeyMapper<Collection<K>, V> keyMapper, final Reducer<K, V> reducer, final ComparisonPolicy<K> comparisonPolicy)
+    public void clear()
+    {
+        keyToReferencesMap.clear();
+        referenceToKeysMap.clear();
+    }
+
+    public ReferenceIndex<K, V> copy()
     {
         final Map<K, References<K, V>> keyToReferencesMapCopy = keyToReferencesMap.entrySet()
                                                                                   .stream()
@@ -118,10 +148,47 @@ public class ReferenceIndex<K, V> extends AbstractIndex<K, V>
         return new ReferenceIndex<>(name, keyMapper, reducer, comparisonPolicy, keyToReferencesMapCopy, referenceToKeysMapCopy);
     }
 
-    @Override
-    public void clear()
+    private Set<K> generateKeys(final Reference<V> reference) throws IndexCreationException
     {
-        keyToReferencesMap.clear();
-        referenceToKeysMap.clear();
+        final V item;
+
+        try
+        {
+            item = reference.get();
+        }
+        catch (final RuntimeException e)
+        {
+            throw new IndexCreationException("Index: " + name + ". Unable to retrieve item to index", e);
+        }
+
+        try
+        {
+            return keyMapper.map(item)
+                            .stream()
+                            .map(this::getComparableKey)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+        }
+        catch (final RuntimeException e)
+        {
+            throw new IndexCreationException("Index: " + name + ". Error generating indexes for item: " + item, e);
+        }
+    }
+
+    private K getComparableKey(final Object key)
+    {
+        if (key == null || !comparisonPolicy.supports(key.getClass()))
+        {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked") final K comparable = comparisonPolicy.createComparable((K) key);
+        return comparable;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Index[name='" + name + "\']";
     }
 }

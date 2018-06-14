@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class ReferenceIndexManager<V> extends IndexManager<V>
 {
-    private ReferenceIndexManager(final Collection<AbstractIndex<?, V>> indexes)
+    private ReferenceIndexManager(final Collection<ReferenceIndex<?, V>> indexes)
     {
         super(indexes);
     }
@@ -17,13 +17,13 @@ public class ReferenceIndexManager<V> extends IndexManager<V>
     }
 
     @Override
-    protected IndexManager<V> createCopy(final Set<AbstractIndex<?, V>> indexes)
+    protected IndexManager<V> createCopy(final Set<ReferenceIndex<?, V>> indexes)
     {
         return new ReferenceIndexManager<>(indexes);
     }
 
     @Override
-    protected <K> AbstractIndex<K, V> createIndex(final String indexName, final IndexDefinition<K, V> indexDefinition)
+    protected <K> ReferenceIndex<K, V> createIndex(final String indexName, final IndexDefinition<K, V> indexDefinition)
     {
         return new ReferenceIndex<>(indexName, indexDefinition.getKeyMapper(), indexDefinition.getReducer(), indexDefinition.getComparisonPolicy());
     }

@@ -3,7 +3,6 @@ package com.jparams.store;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,6 +11,7 @@ import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
 import com.jparams.store.index.KeyMapper;
+import com.jparams.store.query.Query;
 
 /**
  * Store of data
@@ -21,10 +21,10 @@ import com.jparams.store.index.KeyMapper;
 public interface Store<V> extends Collection<V>
 {
     /**
-     * Create an index using the index definition provided
+     * Create an index using the index build provided
      *
      * @param indexName       name of the index
-     * @param indexDefinition definition of the index
+     * @param indexDefinition build of the index
      * @param <K>             indexed key type
      * @return index
      * @throws IndexException thrown if the creation of the new index fails with exceptions.
@@ -32,9 +32,9 @@ public interface Store<V> extends Collection<V>
     <K> Index<V> index(String indexName, IndexDefinition<K, V> indexDefinition) throws IndexException;
 
     /**
-     * Create an index using the index definition provided
+     * Create an index using the index build provided
      *
-     * @param indexDefinition definition of the index
+     * @param indexDefinition build of the index
      * @param <K>             indexed key type
      * @return index
      * @throws IndexException thrown if the creation of the new index fails with exceptions.
@@ -79,11 +79,25 @@ public interface Store<V> extends Collection<V>
      *
      * @param indexName name of the index to query
      * @param key       key to lookup
+     * @param limit     limit results to the first x number of items
+     * @return values associated with this key or an empty list
+     */
+    default List<V> get(final String indexName, final Object key, final Integer limit)
+    {
+        return get(Query.where(indexName, key), limit);
+    }
+
+    /**
+     * Query an index by name and lookup the given key. This method is the equivalent of calling {@link #getIndex(String)}
+     * and then {@link Index#get(Object)}
+     *
+     * @param indexName name of the index to query
+     * @param key       key to lookup
      * @return values associated with this key or an empty list
      */
     default List<V> get(final String indexName, final Object key)
     {
-        return findIndex(indexName).map(index -> index.get(key)).orElse(Collections.emptyList());
+        return get(Query.where(indexName, key), null);
     }
 
     /**
@@ -96,7 +110,7 @@ public interface Store<V> extends Collection<V>
      */
     default V getFirst(final String indexName, final Object key)
     {
-        return findIndex(indexName).map(index -> index.getFirst(key)).orElse(null);
+        return getFirst(Query.where(indexName, key));
     }
 
     /**
@@ -109,7 +123,50 @@ public interface Store<V> extends Collection<V>
      */
     default Optional<V> findFirst(final String indexName, final Object key)
     {
-        return findIndex(indexName).flatMap(index -> index.findFirst(key));
+        return Optional.ofNullable(getFirst(indexName, key));
+    }
+
+    /**
+     * Query indexes and look up all  matching value.
+     *
+     * @param query query to execute
+     * @param limit limit results to the first x number of items
+     * @return values associated with this key or an empty list
+     */
+    List<V> get(final Query query, Integer limit);
+
+    /**
+     * Query indexes and look up all  matching value.
+     *
+     * @param query query to execute
+     * @return values associated with this key or an empty list
+     */
+    default List<V> get(final Query query)
+    {
+        return get(query, null);
+    }
+
+    /**
+     * Query indexes and look up the first matching value.
+     *
+     * @param query query to execute
+     * @return first value matching the query
+     */
+    default V getFirst(final Query query)
+    {
+        final List<V> results = get(query, 1);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    /**
+     * Query indexes and look up the first matching value.
+     *
+     * @param query query to execute
+     * @return first value matching the query
+     */
+    default Optional<V> findFirst(final Query query)
+    {
+        return Optional.ofNullable(getFirst(query));
     }
 
     /**

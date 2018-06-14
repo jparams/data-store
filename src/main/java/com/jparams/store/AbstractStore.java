@@ -5,14 +5,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
 import com.jparams.store.index.IndexManager;
+import com.jparams.store.query.IndexMatch;
+import com.jparams.store.query.Operator;
+import com.jparams.store.query.Query;
+import com.jparams.store.query.QueryDefinition;
 import com.jparams.store.reference.Reference;
 import com.jparams.store.reference.ReferenceManager;
 
@@ -25,6 +31,39 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
     {
         this.referenceManager = referenceManager;
         this.indexManager = indexManager;
+    }
+
+    @Override
+    public List<V> get(final Query query, final Integer limit)
+    {
+        final QueryDefinition definition = query.build();
+        final List<IndexMatch> indexMatches = definition.getIndexMatches();
+        final Operator operator = definition.getOperator();
+        final Set<Reference<V>> results = new LinkedHashSet<>();
+
+        boolean firstMatch = true;
+
+        for (final IndexMatch indexMatch : indexMatches)
+        {
+            final Set<Reference<V>> references = Optional.ofNullable(indexManager.getIndex(indexMatch.getIndexName()))
+                                                         .map(index -> index.getReferences(indexMatch.getKey()))
+                                                         .orElse(Collections.emptySet());
+
+            if (firstMatch || operator == Operator.OR)
+            {
+                results.addAll(references);
+                firstMatch = false;
+            }
+            else
+            {
+                results.retainAll(references);
+            }
+        }
+
+        return results.stream()
+                      .map(Reference::get)
+                      .limit(limit == null ? Long.MAX_VALUE : limit)
+                      .collect(Collectors.toList());
     }
 
     @Override
@@ -163,7 +202,6 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
     }
 
     protected abstract Store<V> createCopy(final ReferenceManager<V> referenceManager, final IndexManager<V> indexManager);
-
 
     protected ReferenceManager<V> getReferenceManager()
     {
