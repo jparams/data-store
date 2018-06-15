@@ -176,6 +176,7 @@ public class MemoryStoreTest
 
         assertThat(firstNameIndex.get("James")).containsExactly(person2, person3);
         assertThat(subject.get("firstName", "James")).containsExactly(person2, person3);
+        assertThat(subject.get("firstName", "James", 1)).containsExactly(person2);
 
         assertThat(firstNameIndex.get("Random")).isEmpty();
         assertThat(subject.get("firstName", "Random")).isEmpty();

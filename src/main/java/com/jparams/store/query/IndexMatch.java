@@ -20,13 +20,4 @@ public class IndexMatch
     {
         return key;
     }
-
-    @Override
-    public String toString()
-    {
-        return "IndexMatch{"
-            + "indexName='" + indexName + '\''
-            + ", key=" + key
-            + '}';
-    }
 }

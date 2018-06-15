@@ -1,7 +1,7 @@
 # Data Store
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.jparams/data-store/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.jparams/data-store)
- [![Build Status](https://travis-ci.org/jparams/data-store.svg?branch=master)](https://travis-ci.org/jparams/data-store) [![Coverage Status](https://coveralls.io/repos/github/jparams/data-store/badge.svg)](https://coveralls.io/github/jparams/data-store) [![Javadocs](http://www.javadoc.io/badge/com.jparams/data-store.svg)](http://www.javadoc.io/doc/com.jparams/data-store)
+ [![Build Status](https://travis-ci.org/jparams/data-store.svg?branch=master)](https://travis-ci.org/jparams/data-store) [![Coverage Status](https://coveralls.io/repos/github/jparams/data-store/badge.svg?branch=master)](https://coveralls.io/github/jparams/data-store?branch=master) [![Javadocs](http://www.javadoc.io/badge/com.jparams/data-store.svg)](http://www.javadoc.io/doc/com.jparams/data-store)
 
 ## Getting Started
 

@@ -90,6 +90,16 @@ public class UnmodifiableStoreTest
     }
 
     @Test
+    public void testGetIndexedValuesWithLimit()
+    {
+        final ArrayList<String> list = new ArrayList<>();
+        when(mockStore.get(any(), anyString(), anyInt())).thenReturn(list);
+        assertThat(subject.get("index", "key", 1)).isSameAs(list);
+        verify(mockStore).get("index", "key", 1);
+    }
+
+
+    @Test
     public void testGetFirstValue()
     {
         when(mockStore.getFirst(any(), any())).thenReturn("abc");

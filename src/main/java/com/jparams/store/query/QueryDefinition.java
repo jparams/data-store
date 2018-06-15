@@ -22,13 +22,4 @@ public class QueryDefinition
     {
         return operator;
     }
-
-    @Override
-    public String toString()
-    {
-        return "QueryDefinition{"
-            + "indexMatches=" + indexMatches
-            + ", operator=" + operator
-            + '}';
-    }
 }

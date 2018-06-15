@@ -23,7 +23,7 @@ public class MinReducerTest
         final Element<String> element4 = new Element<>(new MemoryReference<>("element4"));
         final Element<String> element5 = new Element<>(new MemoryReference<>(null));
 
-        subject.reduce("key", Arrays.asList(element0, element1, element2, element3, element3, element4, element5));
+        subject.reduce("key", Arrays.asList(element0, element3, element3, element4, element2, element1, element5));
 
         assertThat(element0).extracting("removed").contains(true);
         assertThat(element1).extracting("removed").contains(false);

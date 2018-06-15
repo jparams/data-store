@@ -18,28 +18,40 @@ public class SynchronizedIndex<T> implements Index<T>
     @Override
     public T getFirst(final Object key)
     {
+        final T result;
+
         synchronized (mutex)
         {
-            return index.getFirst(key);
+            result = index.getFirst(key);
         }
+
+        return result;
     }
 
     @Override
     public Optional<T> findFirst(final Object key)
     {
+        final Optional<T> result;
+
         synchronized (mutex)
         {
-            return index.findFirst(key);
+            result = index.findFirst(key);
         }
+
+        return result;
     }
 
     @Override
     public List<T> get(final Object key)
     {
+        final List<T> results;
+
         synchronized (mutex)
         {
-            return index.get(key);
+            results = index.get(key);
         }
+
+        return results;
     }
 
     @Override
