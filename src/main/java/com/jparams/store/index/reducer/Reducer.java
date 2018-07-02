@@ -20,4 +20,15 @@ public interface Reducer<K, V>
      * @param elements elements to reduce
      */
     void reduce(K key, List<Element<V>> elements);
+
+    /**
+     * Chain two reducers together
+     *
+     * @param reducer reducer
+     * @return chained reducer
+     */
+    default Reducer<K, V> andThen(final Reducer<K, V> reducer)
+    {
+        return new MultiReducer<>(this, reducer);
+    }
 }
