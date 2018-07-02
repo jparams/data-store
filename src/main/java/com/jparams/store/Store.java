@@ -11,6 +11,7 @@ import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
 import com.jparams.store.index.KeyMapper;
+import com.jparams.store.index.reducer.Reducer;
 import com.jparams.store.query.Query;
 
 /**
@@ -57,6 +58,37 @@ public interface Store<V> extends Collection<V>
     default <K> Index<V> index(final String indexName, final KeyMapper<K, V> keyMapper) throws IndexException
     {
         return index(indexName, IndexDefinition.withKeyMapping(keyMapper));
+    }
+
+    /**
+     * Register a new index with this store, mapping a single value to a collection of indexed keys.
+     * This is a convenient of creating an index, for more options see {@link #index(IndexDefinition)}
+     *
+     * @param indexName name of the index
+     * @param keyMapper function to provide a value to one or more keys
+     * @param reducer   function to reduce indexed values
+     * @param <K>       key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> index(final String indexName, final KeyMapper<K, V> keyMapper, final Reducer<K, V> reducer) throws IndexException
+    {
+        return index(indexName, IndexDefinition.withKeyMapping(keyMapper).withReducer(reducer));
+    }
+
+    /**
+     * Register a new index with this store, mapping a single value to a collection of indexed keys.
+     * This is a convenient of creating an index, for more options see {@link #index(IndexDefinition)}
+     *
+     * @param keyMapper function to provide a value to one or more keys
+     * @param reducer   function to reduce indexed values
+     * @param <K>       key type
+     * @return index
+     * @throws IndexException thrown if the new index failed with exceptions.
+     */
+    default <K> Index<V> index(final KeyMapper<K, V> keyMapper, final Reducer<K, V> reducer) throws IndexException
+    {
+        return index(IndexDefinition.withKeyMapping(keyMapper).withReducer(reducer));
     }
 
     /**

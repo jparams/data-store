@@ -12,6 +12,7 @@ import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
 import com.jparams.store.index.KeyMapper;
 import com.jparams.store.index.SynchronizedIndex;
+import com.jparams.store.index.reducer.Reducer;
 import com.jparams.store.query.Query;
 
 /**
@@ -159,6 +160,32 @@ public class SynchronizedStore<V> implements Store<V>
         synchronized (mutex)
         {
             index = store.index(keyMapper);
+        }
+
+        return index;
+    }
+
+    @Override
+    public <K> Index<V> index(final String indexName, final KeyMapper<K, V> keyMapper, final Reducer<K, V> reducer) throws IndexException
+    {
+        final Index<V> index;
+
+        synchronized (mutex)
+        {
+            index = store.index(indexName, keyMapper, reducer);
+        }
+
+        return index;
+    }
+
+    @Override
+    public <K> Index<V> index(final KeyMapper<K, V> keyMapper, final Reducer<K, V> reducer) throws IndexException
+    {
+        final Index<V> index;
+
+        synchronized (mutex)
+        {
+            index = store.index(keyMapper, reducer);
         }
 
         return index;
