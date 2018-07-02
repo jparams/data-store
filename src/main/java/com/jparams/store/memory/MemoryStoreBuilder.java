@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.KeyMapper;
+import com.jparams.store.index.reducer.Reducer;
 
 /**
  * Builder for a memory store
@@ -41,6 +42,12 @@ public final class MemoryStoreBuilder<V>
     public final <K> MemoryStoreBuilder<V> withIndex(final String indexName, final KeyMapper<K, V> keyMapper)
     {
         store.index(indexName, keyMapper);
+        return this;
+    }
+
+    public final <K> MemoryStoreBuilder<V> withIndex(final String indexName, final KeyMapper<K, V> keyMapper, final Reducer<K, V> reducer)
+    {
+        store.index(indexName, keyMapper, reducer);
         return this;
     }
 

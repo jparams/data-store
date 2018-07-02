@@ -14,7 +14,7 @@ public class MaxReducerTest
     @Test
     public void testReducer()
     {
-        final MaxReducer<String, String, String> subject = new MaxReducer<>(str -> str, false);
+        final MaxReducer<String, String> subject = new MaxReducer<>(str -> str, false);
 
         final Element<String> element0 = new Element<>(new MemoryReference<>(null));
         final Element<String> element1 = new Element<>(new MemoryReference<>("element1"));
@@ -36,7 +36,7 @@ public class MaxReducerTest
     @Test
     public void testReducerWithNullGreater()
     {
-        final MaxReducer<String, String, String> subject = new MaxReducer<>(str -> str, true);
+        final MaxReducer<String, String> subject = new MaxReducer<>(str -> str, true);
 
         final Element<String> element0 = new Element<>(new MemoryReference<>(null));
         final Element<String> element1 = new Element<>(new MemoryReference<>("element1"));
