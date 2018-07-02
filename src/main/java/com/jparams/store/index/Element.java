@@ -37,14 +37,6 @@ public final class Element<V>
     }
 
     /**
-     * Restore a removed element
-     */
-    public void restore()
-    {
-        removed = false;
-    }
-
-    /**
      * Is removed
      *
      * @return removed

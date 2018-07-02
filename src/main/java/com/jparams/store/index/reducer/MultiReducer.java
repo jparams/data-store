@@ -3,6 +3,7 @@ package com.jparams.store.index.reducer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.jparams.store.index.Element;
 
@@ -26,7 +27,7 @@ class MultiReducer<K, V> implements Reducer<K, V>
     {
         for (final Reducer<K, V> reducer : reducers)
         {
-            reducer.reduce(key, elements);
+            reducer.reduce(key, elements.stream().filter(element -> !element.isRemoved()).collect(Collectors.toList()));
         }
     }
 
