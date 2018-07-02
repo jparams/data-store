@@ -12,6 +12,8 @@ import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.KeyMapper;
 import com.jparams.store.index.SynchronizedIndex;
+import com.jparams.store.index.reducer.MaxReducer;
+import com.jparams.store.index.reducer.Reducer;
 import com.jparams.store.query.BasicQuery;
 import com.jparams.store.query.Query;
 
@@ -147,6 +149,28 @@ public class SynchronizedStoreTest
         subject.index(keyProvider);
 
         verify(mockStore).index(same(keyProvider));
+    }
+
+    @Test
+    public void testIndexWithProviderAndReducer()
+    {
+        final KeyMapper<String, String> keyProvider = (val) -> "";
+        final Reducer<String, String> reducer = new MaxReducer<>(str -> str, true);
+
+        subject.index(keyProvider, reducer);
+
+        verify(mockStore).index(same(keyProvider), same(reducer));
+    }
+
+    @Test
+    public void testIndexWithNameProviderAndReducer()
+    {
+        final KeyMapper<String, String> keyProvider = (val) -> "";
+        final Reducer<String, String> reducer = new MaxReducer<>(str -> str, true);
+
+        subject.index("", keyProvider, reducer);
+
+        verify(mockStore).index(eq(""), same(keyProvider), same(reducer));
     }
 
     @Test

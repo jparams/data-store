@@ -11,6 +11,7 @@ import com.jparams.store.index.Index;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.IndexException;
 import com.jparams.store.index.KeyMapper;
+import com.jparams.store.index.reducer.Reducer;
 import com.jparams.store.query.Query;
 
 /**
@@ -47,6 +48,18 @@ public class UnmodifiableStore<V> implements Store<V>
 
     @Override
     public <K> Index<V> index(final KeyMapper<K, V> keyMapper) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> index(final String indexName, final KeyMapper<K, V> keyMapper, final Reducer<K, V> reducer) throws IndexException
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K> Index<V> index(final KeyMapper<K, V> keyMapper, final Reducer<K, V> reducer) throws IndexException
     {
         throw new UnsupportedOperationException();
     }

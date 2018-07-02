@@ -52,7 +52,25 @@ public class MemoryStore<V> extends AbstractStore<V>
         return getReferenceManager().getReferences().toString();
     }
 
+    /**
+     * New store builder
+     *
+     * @param <V> data type
+     * @return builder
+     */
     public static <V> MemoryStoreBuilder<V> newStore()
+    {
+        return new MemoryStoreBuilder<>();
+    }
+
+    /**
+     * New store builder. This store isn't strongly typed, this is the same as calling MemoryStore.&lt;String&gt;newStore()
+     *
+     * @param type data type
+     * @param <V>  data type
+     * @return builder
+     */
+    public static <V> MemoryStoreBuilder<V> newStore(final Class<V> type)
     {
         return new MemoryStoreBuilder<>();
     }

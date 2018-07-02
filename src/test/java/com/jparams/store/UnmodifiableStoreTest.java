@@ -134,6 +134,18 @@ public class UnmodifiableStoreTest
     }
 
     @Test(expected = UnsupportedOperationException.class)
+    public void testIndexWithNameDefinitionAndReducer()
+    {
+        subject.index("", str -> str, null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testIndexWithDefinitionAndReducer()
+    {
+        subject.index(str -> str, null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
     public void testIndex()
     {
         subject.index(IndexDefinition.withKeyMapping(null));
