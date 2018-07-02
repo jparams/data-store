@@ -1,7 +1,7 @@
 package com.jparams.store.index.reducer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.jparams.store.index.Element;
@@ -16,15 +16,9 @@ class MultiReducer<K, V> implements Reducer<K, V>
 {
     private final List<Reducer<K, V>> reducers;
 
-    private MultiReducer(final List<Reducer<K, V>> reducers)
+    MultiReducer(final List<Reducer<K, V>> reducers)
     {
         this.reducers = new ArrayList<>(reducers);
-    }
-
-    @SafeVarargs
-    MultiReducer(final Reducer<K, V>... reducers)
-    {
-        this.reducers = Arrays.asList(reducers);
     }
 
     @Override
@@ -37,10 +31,15 @@ class MultiReducer<K, V> implements Reducer<K, V>
     }
 
     @Override
-    public Reducer<K, V> andThen(final Reducer<K, V> reducer)
+    public MultiReducer<K, V> andThen(final Reducer<K, V> reducer)
     {
         final List<Reducer<K, V>> updatedReducers = new ArrayList<>(reducers);
         updatedReducers.add(reducer);
         return new MultiReducer<>(updatedReducers);
+    }
+
+    public List<Reducer<K, V>> getReducers()
+    {
+        return Collections.unmodifiableList(reducers);
     }
 }
