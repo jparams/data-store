@@ -1,9 +1,11 @@
 package com.jparams.store.model;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Person
+public class Person implements Serializable
 {
     private Long id;
     private String firstName;

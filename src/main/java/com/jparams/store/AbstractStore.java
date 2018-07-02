@@ -27,10 +27,10 @@ public abstract class AbstractStore<V> extends AbstractCollection<V> implements 
     private final ReferenceManager<V> referenceManager;
     private final IndexManager<V> indexManager;
 
-    protected AbstractStore(final ReferenceManager<V> referenceManager, final IndexManager<V> indexManager)
+    protected AbstractStore(final IndexManager<V> indexManager, final ReferenceManager<V> referenceManager)
     {
-        this.referenceManager = referenceManager;
         this.indexManager = indexManager;
+        this.referenceManager = referenceManager;
     }
 
     @Override

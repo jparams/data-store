@@ -4,10 +4,8 @@ import java.util.Collection;
 
 import com.jparams.store.AbstractStore;
 import com.jparams.store.Store;
-import com.jparams.store.identity.DefaultIdentityProvider;
 import com.jparams.store.index.IndexManager;
 import com.jparams.store.index.ReferenceIndexManager;
-import com.jparams.store.reference.DefaultReferenceManager;
 import com.jparams.store.reference.ReferenceManager;
 
 /**
@@ -19,12 +17,12 @@ public class MemoryStore<V> extends AbstractStore<V>
 {
     private MemoryStore(final ReferenceManager<V> referenceManager, final IndexManager<V> indexManager)
     {
-        super(referenceManager, indexManager);
+        super(indexManager, referenceManager);
     }
 
     public MemoryStore()
     {
-        this(new DefaultReferenceManager<>(new DefaultIdentityProvider(), new MemoryReferenceFactory<>()), new ReferenceIndexManager<>());
+        this(new MemoryReferenceManager<>(), new ReferenceIndexManager<>());
     }
 
     public MemoryStore(final Collection<V> items)

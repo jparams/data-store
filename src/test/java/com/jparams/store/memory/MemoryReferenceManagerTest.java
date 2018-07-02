@@ -1,38 +1,24 @@
-package com.jparams.store.reference;
+package com.jparams.store.memory;
 
 import java.util.Collection;
 import java.util.Optional;
 
-import com.jparams.store.identity.IdentityProvider;
-import com.jparams.store.memory.MemoryReference;
+import com.jparams.store.reference.Reference;
+import com.jparams.store.reference.ReferenceManager;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DefaultReferenceManagerTest
+public class MemoryReferenceManagerTest
 {
-    private DefaultReferenceManager<String> subject;
-
-    @Mock
-    private IdentityProvider mockIdentityProvider;
-
-    @Mock
-    private ReferenceFactory<String> mockReferenceFactory;
+    private MemoryReferenceManager<String> subject;
 
     @Before
     public void setUp()
     {
-        subject = new DefaultReferenceManager<>(mockIdentityProvider, mockReferenceFactory);
-        when(mockIdentityProvider.getIdentity(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
-        when(mockReferenceFactory.createReference(any())).thenAnswer(invocation -> new MemoryReference<>(invocation.getArguments()[0]));
+        subject = new MemoryReferenceManager<>();
     }
 
     @Test

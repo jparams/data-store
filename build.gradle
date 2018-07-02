@@ -26,9 +26,11 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
+    compile 'com.jparams:data-file:1.0.0'
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:3.9.1'
     testCompile 'eu.codearte.catch-exception:catch-exception:1.4.4'
