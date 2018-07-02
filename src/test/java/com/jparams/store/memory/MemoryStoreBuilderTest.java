@@ -5,6 +5,8 @@ import java.util.Collections;
 import com.jparams.store.Store;
 import com.jparams.store.index.IndexDefinition;
 import com.jparams.store.index.comparison.string.CaseInsensitiveComparisonPolicy;
+import com.jparams.store.index.reducer.LimitReducer;
+import com.jparams.store.index.reducer.LimitReducer.Retain;
 import com.jparams.store.model.Person;
 import com.jparams.store.model.PersonBuilder;
 
@@ -24,6 +26,7 @@ public class MemoryStoreBuilderTest
 
         final Store<Person> store = MemoryStore.<Person>newStore()
             .withIndex("firstName", Person::getFirstName)
+            .withIndex("firstName1", Person::getFirstName, new LimitReducer<>(1, Retain.OLDEST))
             .withIndex("lastName", IndexDefinition.withKeyMapping(Person::getLastName).withComparisonPolicy(new CaseInsensitiveComparisonPolicy()))
             .withValue(person1)
             .withValues(person2, person3)

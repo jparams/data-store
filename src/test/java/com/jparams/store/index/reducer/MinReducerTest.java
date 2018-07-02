@@ -14,7 +14,7 @@ public class MinReducerTest
     @Test
     public void testReducerWithNullGreater()
     {
-        final MinReducer<String, String, String> subject = new MinReducer<>(str -> str, true);
+        final MinReducer<String, String> subject = new MinReducer<>(str -> str, true);
 
         final Element<String> element0 = new Element<>(new MemoryReference<>(null));
         final Element<String> element1 = new Element<>(new MemoryReference<>("element1"));
@@ -36,7 +36,7 @@ public class MinReducerTest
     @Test
     public void testReducer()
     {
-        final MinReducer<String, String, String> subject = new MinReducer<>(str -> str, false);
+        final MinReducer<String, String> subject = new MinReducer<>(str -> str, false);
 
         final Element<String> element0 = new Element<>(new MemoryReference<>(null));
         final Element<String> element1 = new Element<>(new MemoryReference<>("element1"));
