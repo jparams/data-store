@@ -2,6 +2,12 @@ package com.jparams.store.index;
 
 import com.jparams.store.reference.Reference;
 
+/**
+ * A wrapper around an element in the data store. Only call {@link #get()} when necessary, depending on the Store implementation
+ * this may result in an IO operation.
+ *
+ * @param <V> value type
+ */
 public final class Element<V>
 {
     private final Reference<V> reference;
@@ -12,23 +18,44 @@ public final class Element<V>
         this.reference = reference;
     }
 
+    /**
+     * Get the value of the element
+     *
+     * @return element value
+     */
     public V get()
     {
         return reference.get();
     }
 
+    /**
+     * Remove this element
+     */
     public void remove()
     {
         removed = true;
     }
 
+    /**
+     * Restore a removed element
+     */
+    public void restore()
+    {
+        removed = false;
+    }
+
+    /**
+     * Is removed
+     *
+     * @return removed
+     */
+    public boolean isRemoved()
+    {
+        return removed;
+    }
+
     Reference<V> getReference()
     {
         return reference;
-    }
-
-    boolean isRemoved()
-    {
-        return removed;
     }
 }

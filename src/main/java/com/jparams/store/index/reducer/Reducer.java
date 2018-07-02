@@ -1,5 +1,6 @@
 package com.jparams.store.index.reducer;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.jparams.store.index.Element;
@@ -20,4 +21,15 @@ public interface Reducer<K, V>
      * @param elements elements to reduce
      */
     void reduce(K key, List<Element<V>> elements);
+
+    /**
+     * Chain two reducers together
+     *
+     * @param reducer reducer
+     * @return chained reducer
+     */
+    default Reducer<K, V> andThen(final Reducer<K, V> reducer)
+    {
+        return new MultiReducer<>(Arrays.asList(this, reducer));
+    }
 }
